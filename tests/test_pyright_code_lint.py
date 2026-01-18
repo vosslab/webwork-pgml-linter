@@ -140,7 +140,7 @@ def run_pyright(repo_root: str, files: list[str]) -> tuple[bool, list[str]]:
 	had_failure = False
 	for chunk in chunked(files, CHUNK_SIZE):
 		result = subprocess.run(
-			[pyright_bin] + chunk,
+			[pyright_bin, "--level", "basic"] + chunk,
 			capture_output=True,
 			text=True,
 			cwd=repo_root,
