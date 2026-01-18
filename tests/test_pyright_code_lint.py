@@ -138,9 +138,10 @@ def run_pyright(repo_root: str, files: list[str]) -> tuple[bool, list[str]]:
 		raise AssertionError("pyright not found on PATH.")
 	output_lines = []
 	had_failure = False
+	pyright_config = os.path.join(REPO_ROOT, "tests", "pyrightconfig.json")
 	for chunk in chunked(files, CHUNK_SIZE):
 		result = subprocess.run(
-			[pyright_bin, "--level", "basic"] + chunk,
+			[pyright_bin, "-p", pyright_config] + chunk,
 			capture_output=True,
 			text=True,
 			cwd=repo_root,
