@@ -1,8 +1,8 @@
-# Standard Library
+# PIP3 modules
 import pytest
 
-# Local modules
-import pg_analyze.tokenize
+# local repo modules
+import pgml_lint.parser
 
 
 @pytest.mark.parametrize(
@@ -23,7 +23,7 @@ def test_strip_comments_preserves_hash_in_heredoc_body(heredoc_opener: str) -> N
 		"$y = 2; # strip me too\n"
 	)
 
-	stripped = pg_analyze.tokenize.strip_comments(text)
+	stripped = pgml_lint.parser.strip_comments(text)
 
 	expected = (
 		"$x = 1; \n"
@@ -41,22 +41,22 @@ def test_strip_comments_preserves_hash_in_strings() -> None:
 		"$x = '# not a comment'; # comment\n"
 		"$y = \"# not a comment\"; # comment\n"
 	)
-	stripped = pg_analyze.tokenize.strip_comments(text)
+	stripped = pgml_lint.parser.strip_comments(text)
 	assert stripped == "$x = '# not a comment'; \n$y = \"# not a comment\"; \n"
 
 
 def test_iter_calls_supports_qualified_names() -> None:
 	text = "PGML::Format(1, 2);\n"
-	newlines = pg_analyze.tokenize.build_newline_index(text)
-	calls = pg_analyze.tokenize.iter_calls(text, {"PGML::Format"}, newlines=newlines)
+	newlines = pgml_lint.parser.build_newline_index(text)
+	calls = pgml_lint.parser.iter_calls(text, {"PGML::Format"}, newlines=newlines)
 	assert len(calls) == 1
-	assert calls[0].name == "PGML::Format"
-	assert calls[0].arg_text == "1, 2"
-	assert calls[0].line == 1
+	assert calls[0]["name"] == "PGML::Format"
+	assert calls[0]["arg_text"] == "1, 2"
+	assert calls[0]["line"] == 1
 
 
 def test_iter_calls_ignores_unbalanced_parens() -> None:
 	text = "ANS($a->cmp(\n"
-	newlines = pg_analyze.tokenize.build_newline_index(text)
-	calls = pg_analyze.tokenize.iter_calls(text, {"ANS"}, newlines=newlines)
+	newlines = pgml_lint.parser.build_newline_index(text)
+	calls = pgml_lint.parser.iter_calls(text, {"ANS"}, newlines=newlines)
 	assert calls == []

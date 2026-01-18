@@ -4,6 +4,10 @@
 
 Initial release as a standalone PyPI package.
 
+- Remove leftover `pg_analyze` references from old repo structure.
+- Update test imports: `pg_analyze.tokenize` -> `pgml_lint.parser`.
+- Remove obsolete `test_pgml_blocks_sampler.py` that tested non-existent `pg_analyze.aggregate` module.
+
 - Create `pgml_lint/` plugin framework with built-in PGML lint modules and tests.
 - Add PGML-aware lint checks for blocks, heredocs, blanks, and inline markers.
 - Add macro/assignment parsing with line-numbered output and optional JSON summaries.
