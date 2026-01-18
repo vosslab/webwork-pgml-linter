@@ -52,12 +52,16 @@ def test_bandit_security() -> None:
 	if os.environ.get(SKIP_ENV) == "1":
 		return
 
+	# Delete old report file before running
+	bandit_out = os.path.join(REPO_ROOT, "report_bandit.txt")
+	if os.path.exists(bandit_out):
+		os.remove(bandit_out)
+
 	exit_code, output = run_bandit(REPO_ROOT)
 	if exit_code == 0:
 		return
 
-	bandit_out = os.path.join(REPO_ROOT, "bandit.txt")
 	with open(bandit_out, "w", encoding="utf-8") as handle:
 		handle.write(output)
 
-	raise AssertionError("Bandit issues detected. See REPO_ROOT/bandit.txt")
+	raise AssertionError("Bandit issues detected. See REPO_ROOT/report_bandit.txt")

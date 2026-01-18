@@ -1,7 +1,8 @@
 OTHER_REPOS-do_not_commit/
-shebang_report.txt
-pyflakes.txt
 .DS_Store
-bandit.txt
-pyright.txt
 
+report_shebang.txt
+report_pyflakes.txt
+report_bandit.txt
+report_pyright.txt
+report_ascii_compliance.txt

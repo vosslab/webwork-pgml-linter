@@ -178,16 +178,18 @@ def test_pyright_code_lint() -> None:
 	if os.environ.get(SKIP_ENV) == "1":
 		return
 
+	# Delete old report file before running
+	pyright_out = os.path.join(REPO_ROOT, "report_pyright.txt")
+	if os.path.exists(pyright_out):
+		os.remove(pyright_out)
+
 	scope = resolve_scope()
 	if scope == "changed":
 		files = gather_changed_files(REPO_ROOT)
 	else:
 		files = gather_files(REPO_ROOT)
 
-	pyright_out = os.path.join(REPO_ROOT, "pyright.txt")
 	if not files:
-		if os.path.exists(pyright_out):
-			os.remove(pyright_out)
 		print(f"pyright: no Python files matched scope {scope}.")
 		print("No errors found!!!")
 		return
@@ -196,8 +198,6 @@ def test_pyright_code_lint() -> None:
 	had_failure, lines = run_pyright(REPO_ROOT, files)
 
 	if not had_failure:
-		if os.path.exists(pyright_out):
-			os.remove(pyright_out)
 		print("No errors found!!!")
 		return
 
@@ -211,5 +211,5 @@ def test_pyright_code_lint() -> None:
 		print(line)
 	print("-------------------------")
 	print("")
-	print("Found pyright issues written to REPO_ROOT/pyright.txt")
+	print("Found pyright issues written to REPO_ROOT/report_pyright.txt")
 	raise AssertionError("Pyright errors detected.")

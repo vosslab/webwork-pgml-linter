@@ -381,10 +381,12 @@ def test_ascii_compliance(pytestconfig) -> None:
 	else:
 		files = gather_files(REPO_ROOT)
 
-	ascii_out = os.path.join(REPO_ROOT, "ascii_compliance.txt")
+	# Delete old report file before running
+	ascii_out = os.path.join(REPO_ROOT, "report_ascii_compliance.txt")
+	if os.path.exists(ascii_out):
+		os.remove(ascii_out)
+
 	if not files:
-		if os.path.exists(ascii_out):
-			os.remove(ascii_out)
 		print("No files matched the requested scope.")
 		print("No errors found!!!")
 		return
@@ -417,8 +419,6 @@ def test_ascii_compliance(pytestconfig) -> None:
 		sys.stderr.flush()
 
 	if not all_lines:
-		if os.path.exists(ascii_out):
-			os.remove(ascii_out)
 		print("No errors found!!!")
 		return
 
@@ -484,7 +484,7 @@ def test_ascii_compliance(pytestconfig) -> None:
 		print("")
 		print(f"Found {emoji_count} emoji codepoints; handle them case by case.")
 
-	print("Found {} ASCII compliance errors written to REPO_ROOT/ascii_compliance.txt".format(
+	print("Found {} ASCII compliance errors written to REPO_ROOT/report_ascii_compliance.txt".format(
 		len(all_lines),
 	))
 	raise AssertionError("ASCII compliance errors detected.")

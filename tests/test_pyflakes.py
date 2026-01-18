@@ -262,16 +262,18 @@ def test_pyflakes() -> None:
 	if os.environ.get(SKIP_ENV) == "1":
 		return
 
+	# Delete old report file before running
+	pyflakes_out = os.path.join(REPO_ROOT, "report_pyflakes.txt")
+	if os.path.exists(pyflakes_out):
+		os.remove(pyflakes_out)
+
 	scope = resolve_scope()
 	if scope == "changed":
 		files = gather_changed_files(REPO_ROOT)
 	else:
 		files = gather_files(REPO_ROOT)
 
-	pyflakes_out = os.path.join(REPO_ROOT, "pyflakes.txt")
 	if not files:
-		if os.path.exists(pyflakes_out):
-			os.remove(pyflakes_out)
 		print(f"pyflakes: no Python files matched scope {scope}.")
 		print("No errors found!!!")
 		return
@@ -281,8 +283,6 @@ def test_pyflakes() -> None:
 	result_count = len(lines)
 
 	if result_count == 0:
-		if os.path.exists(pyflakes_out):
-			os.remove(pyflakes_out)
 		print("No errors found!!!")
 		return
 
@@ -299,7 +299,7 @@ def test_pyflakes() -> None:
 			print(shorten_paths(line))
 		print("-------------------------")
 		print("")
-		print(f"Found {result_count} pyflakes errors written to REPO_ROOT/pyflakes.txt")
+		print(f"Found {result_count} pyflakes errors written to REPO_ROOT/report_pyflakes.txt")
 		raise AssertionError("Pyflakes errors detected.")
 
 	print("")
@@ -338,5 +338,5 @@ def test_pyflakes() -> None:
 	print("-------------------------")
 	print("")
 
-	print(f"Found {result_count} pyflakes errors written to REPO_ROOT/pyflakes.txt")
+	print(f"Found {result_count} pyflakes errors written to REPO_ROOT/report_pyflakes.txt")
 	raise AssertionError("Pyflakes errors detected.")
