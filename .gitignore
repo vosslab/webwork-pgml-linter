@@ -4,3 +4,9 @@ pyflakes.txt
 .DS_Store                                                                                                             
 bandit.txt                                                                                                            
 pyright.txt  
+
+shebang_report.txt
+pyflakes.txt
+.DS_Store
+bandit.txt
+pyright.txt
