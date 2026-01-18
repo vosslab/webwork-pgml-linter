@@ -1,0 +1,6 @@
+# Runtime dependencies
+# (none - pure Python implementation)
+
+# Development dependencies
+pyflakes  # Static analysis
+pytest  # Testing

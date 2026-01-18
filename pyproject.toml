@@ -1,0 +1,58 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "webwork-pgml-linter"
+version = "26.01b1"
+description = "A static linter for WeBWorK .pg problem files with PGML validation"
+readme = "README.md"
+license = "LGPL-2.1-or-later"
+requires-python = ">=3.10"
+authors = [
+	{name = "Neil R. Voss"},
+]
+keywords = [
+	"webwork",
+	"pgml",
+	"linter",
+	"static-analysis",
+	"education",
+]
+classifiers = [
+	"Development Status :: 4 - Beta",
+	"Environment :: Console",
+	"Intended Audience :: Developers",
+	"Intended Audience :: Education",
+	"License :: OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv2+)",
+	"Operating System :: OS Independent",
+	"Programming Language :: Python :: 3",
+	"Programming Language :: Python :: 3.10",
+	"Programming Language :: Python :: 3.11",
+	"Programming Language :: Python :: 3.12",
+	"Programming Language :: Python :: 3.13",
+	"Topic :: Education",
+	"Topic :: Software Development :: Quality Assurance",
+	"Topic :: Text Processing :: Markup",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+	"pyflakes",
+	"pytest",
+]
+
+[project.urls]
+Homepage = "https://github.com/vosslab/webwork-pgml-linter"
+Repository = "https://github.com/vosslab/webwork-pgml-linter"
+Issues = "https://github.com/vosslab/webwork-pgml-linter/issues"
+
+[project.scripts]
+pgml-lint = "pgml_lint.cli:main"
+
+[tool.setuptools]
+packages = ["pgml_lint"]
+
+[tool.setuptools.package-data]
+pgml_lint = ["rules/*.yaml"]
