@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-01-19 - docs
+
+- Add [docs/CODE_ARCHITECTURE.md](docs/CODE_ARCHITECTURE.md) and [docs/FILE_STRUCTURE.md](docs/FILE_STRUCTURE.md).
+- Link the new architecture and structure docs from [README.md](README.md).
+- Add [docs/INSTALL.md](docs/INSTALL.md) and [docs/USAGE.md](docs/USAGE.md) stubs.
+- Extend [docs/FILE_STRUCTURE.md](docs/FILE_STRUCTURE.md) with install and usage docs.
+- Add unit test starter coverage for pgml_lint modules and plugin behaviors, with skips for IO-heavy scripts.
+- Refresh [README.md](README.md) to point to install, usage, and core docs with a minimal quick start.
+
 ## 2026-01-18 - v26.01b1
 
 Initial release as a standalone PyPI package.

@@ -1,22 +1,23 @@
 # webwork-pgml-linter
 
-A static linter for WeBWorK `.pg` problem files that checks PGML markup, common authoring mistakes, and style issues. Works offline without requiring the PG library.
+A static linter for WeBWorK `.pg` problem files that checks PGML markup and common authoring mistakes for instructors and content authors.
 
-## Installation
+## Documentation
 
-```bash
-pip install webwork-pgml-linter
-```
+- Getting started:
+  - [docs/INSTALL.md](docs/INSTALL.md) - Setup and install steps.
+  - [docs/USAGE.md](docs/USAGE.md) - CLI usage and examples.
+- Linter docs:
+  - [docs/PGML_LINT.md](docs/PGML_LINT.md) - Linter overview and quick start.
+  - [docs/PGML_LINT_CONCEPTS.md](docs/PGML_LINT_CONCEPTS.md) - PGML syntax concepts.
+  - [docs/PGML_LINT_PLUGINS.md](docs/PGML_LINT_PLUGINS.md) - Built-in plugin reference.
+  - [docs/PGML_LINT_PLUGIN_DEV.md](docs/PGML_LINT_PLUGIN_DEV.md) - Writing custom plugins.
+- Project docs:
+  - [docs/CODE_ARCHITECTURE.md](docs/CODE_ARCHITECTURE.md) - Code architecture overview.
+  - [docs/FILE_STRUCTURE.md](docs/FILE_STRUCTURE.md) - Repo file structure map.
+  - [docs/CHANGELOG.md](docs/CHANGELOG.md) - Release history.
 
-Or install from source:
-
-```bash
-git clone https://github.com/vosslab/webwork-pgml-linter.git
-cd webwork-pgml-linter
-pip install -e .
-```
-
-## Quick Start
+## Quick start
 
 ```bash
 # Check a single file
@@ -24,32 +25,13 @@ pgml-lint -i path/to/file.pg
 
 # Check all .pg files in a directory
 pgml-lint -d problems/
-
-# Verbose output
-pgml-lint -v -i file.pg
-
-# Quiet mode (only errors/warnings)
-pgml-lint -q -d problems/
 ```
 
-## What the Linter Checks
+## Testing
 
-- **PGML block structure**: BEGIN_PGML/END_PGML pairing, nesting errors
-- **DOCUMENT pairing**: DOCUMENT()/ENDDOCUMENT() balance
-- **PGML heredocs**: Unterminated heredoc detection
-- **Inline code markers**: `[@` and `@]` balance
-- **Answer blank syntax**: Missing answer specs, unbalanced braces
-- **Required macros**: PGML.pl loading when PGML is used
-- **Macro coverage**: Functions used without required macro files
-- **Variable assignments**: Blanks referencing undefined variables
-
-## Documentation
-
-- [docs/PGML_LINT.md](docs/PGML_LINT.md) - Usage guide and quick start
-- [docs/PGML_LINT_CONCEPTS.md](docs/PGML_LINT_CONCEPTS.md) - PGML syntax concepts
-- [docs/PGML_LINT_PLUGINS.md](docs/PGML_LINT_PLUGINS.md) - Built-in plugin reference
-- [docs/PGML_LINT_PLUGIN_DEV.md](docs/PGML_LINT_PLUGIN_DEV.md) - Writing custom plugins
-- [docs/PGML_LINT_ARCHITECTURE.md](docs/PGML_LINT_ARCHITECTURE.md) - Internal architecture
+```bash
+python3 -m pytest tests/
+```
 
 ## License
 
