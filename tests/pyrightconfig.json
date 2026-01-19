@@ -1,25 +1,8 @@
 {
 	"pythonVersion": "3.12",
 	"typeCheckingMode": "basic",
-	"exclude": [
-		"**/tests/**",
-		"../tests/**"
-	],
-	"executionEnvironments": [
-		{
-			"root": "..",
-			"extraPaths": [".."]
-		}
-	],
-	"reportArgumentType": "none",
-	"reportAttributeAccessIssue": "none",
-	"reportCallIssue": "none",
-	"reportGeneralTypeIssues": "none",
-	"reportIndexIssue": "none",
 	"reportMissingTypeStubs": false,
-	"reportOperatorIssue": "none",
-	"reportOptionalCall": "none",
-	"reportUnknownArgumentType": false,
 	"reportUnknownMemberType": false,
+	"reportUnknownArgumentType": false,
 	"reportUnknownVariableType": false
 }
