@@ -17,6 +17,14 @@ VAR_ASSIGN_RX = re.compile(r"\$([A-Za-z_][A-Za-z0-9_]*)\s*=")
 ARRAY_HASH_DECL_RX = re.compile(r"\b(?:my|our)\s+[@%]([A-Za-z_][A-Za-z0-9_]*)")
 # Match array/hash assignments: @arr =, %hash =
 ARRAY_HASH_ASSIGN_RX = re.compile(r"[@%]([A-Za-z_][A-Za-z0-9_]*)\s*=")
+# Match list assignments: ($var1, $var2, ...) =
+LIST_ASSIGN_RX = re.compile(r"\(\s*(?:\$([A-Za-z_][A-Za-z0-9_]*)\s*,?\s*)+\s*\)\s*=")
+# Match individual variables in list context
+LIST_VAR_RX = re.compile(r"\$([A-Za-z_][A-Za-z0-9_]*)")
+# Match array element assignments: $arr[...] = (creates @arr via autovivification)
+ARRAY_ELEM_ASSIGN_RX = re.compile(r"\$([A-Za-z_][A-Za-z0-9_]*)\s*\[[^\]]+\]\s*=")
+# Match hash element assignments: $hash{...} = (creates %hash via autovivification)
+HASH_ELEM_ASSIGN_RX = re.compile(r"\$([A-Za-z_][A-Za-z0-9_]*)\s*\{[^\}]+\}\s*=")
 
 MACRO_CALL_NAMES = {"loadMacros", "includePGproblem"}
 
@@ -394,9 +402,12 @@ def extract_assigned_vars(stripped_text: str) -> set[str]:
 	"""
 	Extract Perl variable names that appear declared or assigned.
 
-	Recognizes scalar ($var), array (@arr), and hash (%hash) assignments.
-	Array/hash names are included because PGML blanks reference elements
-	as $arr[0], $hash{key} which use the same base name.
+	Recognizes:
+	- Scalar declarations/assignments: my $var, $var =
+	- Array/hash declarations/assignments: my @arr, @arr =, my %hash, %hash =
+	- List assignments: ($a, $b, $c) = func()
+	- Array element assignments: $arr[0] = (creates @arr via autovivification)
+	- Hash element assignments: $hash{key} = (creates %hash via autovivification)
 
 	Args:
 		stripped_text: Comment- and heredoc-stripped text.
@@ -405,18 +416,42 @@ def extract_assigned_vars(stripped_text: str) -> set[str]:
 		set[str]: Variable names without leading sigil ($/@/%).
 	"""
 	vars_found: set[str] = set()
+
 	# Scalar declarations: my $var, our $var
 	for match in VAR_DECL_RX.finditer(stripped_text):
 		vars_found.add(match.group(1))
+
 	# Scalar assignments: $var =
 	for match in VAR_ASSIGN_RX.finditer(stripped_text):
 		vars_found.add(match.group(1))
+
 	# Array/hash declarations: my @arr, my %hash
 	for match in ARRAY_HASH_DECL_RX.finditer(stripped_text):
 		vars_found.add(match.group(1))
+
 	# Array/hash assignments: @arr =, %hash =
 	for match in ARRAY_HASH_ASSIGN_RX.finditer(stripped_text):
 		vars_found.add(match.group(1))
+
+	# List assignments: ($a, $b, $c) = func()
+	# Extract all variables from within the parentheses
+	for match in LIST_ASSIGN_RX.finditer(stripped_text):
+		# Get the full list assignment
+		list_part = match.group(0)
+		# Extract individual variables from the list
+		for var_match in LIST_VAR_RX.finditer(list_part):
+			vars_found.add(var_match.group(1))
+
+	# Array element assignments: $arr[0] = value (autovivification)
+	# This creates @arr, so we add 'arr' to the set
+	for match in ARRAY_ELEM_ASSIGN_RX.finditer(stripped_text):
+		vars_found.add(match.group(1))
+
+	# Hash element assignments: $hash{key} = value (autovivification)
+	# This creates %hash, so we add 'hash' to the set
+	for match in HASH_ELEM_ASSIGN_RX.finditer(stripped_text):
+		vars_found.add(match.group(1))
+
 	return vars_found
 
 
