@@ -155,9 +155,9 @@ def check_whitespace(path: str) -> list[str]:
 #============================================
 def run_fixer(path: str) -> None:
 	"""Run fix_whitespace.py on a file."""
-	script_path = os.path.join(REPO_ROOT, "fix_whitespace.py")
+	script_path = os.path.join(REPO_ROOT, "tests", "fix_whitespace.py")
 	if not os.path.isfile(script_path):
-		script_path = os.path.join(os.path.dirname(__file__), "..", "fix_whitespace.py")
+		script_path = os.path.join(os.path.dirname(__file__), "fix_whitespace.py")
 	result = subprocess.run(
 		["python3", script_path, "-i", path],
 		capture_output=True,

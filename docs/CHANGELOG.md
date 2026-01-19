@@ -8,6 +8,10 @@
 - Extend [docs/FILE_STRUCTURE.md](docs/FILE_STRUCTURE.md) with install and usage docs.
 - Add unit test starter coverage for pgml_lint modules and plugin behaviors, with skips for IO-heavy scripts.
 - Refresh [README.md](README.md) to point to install, usage, and core docs with a minimal quick start.
+- Point [tests/test_whitespace.py](tests/test_whitespace.py) to [tests/fix_whitespace.py](tests/fix_whitespace.py) and keep the fixer out of repo root.
+- Check [tests/fix_whitespace.py](tests/fix_whitespace.py) via REPO_ROOT/tests fallback in whitespace hygiene.
+- Fix trailing whitespace in [docs/REPO_STYLE.md](docs/REPO_STYLE.md).
+- Align parser newline index test expectation with current implementation.
 
 ## 2026-01-18 - v26.01b1
 
