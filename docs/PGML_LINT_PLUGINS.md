@@ -16,6 +16,7 @@ This document describes each built-in plugin, what it checks, and example issues
 | `pgml_blanks` | Yes | PGML blank specs |
 | `pgml_brackets` | No | PGML bracket balance |
 | `pgml_blank_assignments` | Yes | Variable assignment checking |
+| `pgml_ans_style` | Yes | PGML answer style consistency |
 
 ## block_markers
 
@@ -235,6 +236,47 @@ file.pg: WARNING: PGML blank references $popup without assignment in file
 - Does not recognize all Perl assignment patterns (e.g., `my ($a, $b) = @_`)
 - Does not track scope (may miss local variables in subroutines)
 - May false-positive on variables defined via other means (method calls, etc.)
+
+## pgml_ans_style
+
+**File:** `pgml_lint/plugins/pgml_ans_style.py`
+
+**Purpose:** Warns when ANS() calls appear after END_PGML blocks (mixing styles).
+
+**Checks:**
+- `ANS(...)` function calls appearing after `END_PGML` but before `ENDDOCUMENT()`
+
+**Style Rationale:**
+- Pure PGML style uses inline answer specs: `[_]{$answer}`
+- Old PG style uses `ANS($answer->cmp())` after TEXT/PGML blocks
+- Mixing these styles is inconsistent and can confuse readers
+
+**Example Issues:**
+```
+file.pg:42: WARNING: ANS() call after END_PGML block (mixed style). Pure PGML uses inline answer specs: [_]{$answer} instead of ANS($answer->cmp())
+```
+
+**Good (Pure PGML Style):**
+```perl
+BEGIN_PGML
+What is 6 times 7?
+
+[_]{$answer}
+END_PGML
+```
+
+**Bad (Mixed Style):**
+```perl
+BEGIN_PGML
+What is 6 times 7?
+
+[_______]
+END_PGML
+
+ANS($answer->cmp());
+```
+
+**Note:** For RadioButtons and similar objects, use `[_]{$rb}` instead of displaying with `[@ $rb->buttons() @]*` and then calling `ANS($rb->cmp())`.
 
 ## Plugin Execution Order
 
