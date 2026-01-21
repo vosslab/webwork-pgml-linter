@@ -11,4 +11,5 @@ BUILTIN_PLUGINS = [
 	"pgml_lint.plugins.pgml_blanks",
 	"pgml_lint.plugins.pgml_brackets",
 	"pgml_lint.plugins.pgml_blank_assignments",
+	"pgml_lint.plugins.pgml_ans_style",
 ]
