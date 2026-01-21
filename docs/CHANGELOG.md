@@ -29,12 +29,22 @@ Comprehensive testing on real-world PGML files from the OPL training set with ma
 - Confirmed bugs (28 in full test): Unmatched BEGIN/END blocks, mismatched DOCUMENT/ENDDOCUMENT
 - Legacy PGML (0 after removing old-style files): Old-style ANS() calls
 - False positives (initially 250, reduced to 37): List assignments, array autovivification, complex Perl patterns
+- Generate output files: `confirmed_bugs_pg.txt`, `mixed_legacy_pg.txt`, `likely_false_positives_pg.txt`
+- Document testing results in [TESTING_SUMMARY.md](TESTING_SUMMARY.md)
+
+**Key findings**:
+- Confirmed bugs (4): Unmatched BEGIN/END blocks, mismatched DOCUMENT/ENDDOCUMENT
+- Legacy PGML (7): Old-style ANS() calls - works but should modernize to inline specs
+- False positives (47): List assignments, array autovivification, complex Perl patterns
 
 **Parser limitations discovered**:
 - Doesn't detect list assignments: `($a, $b) = func()`
 - Doesn't detect array element assignments: `$arr[0] = value` (creates @arr)
 - Doesn't recognize old-style ANS(): `[____]` + `ANS()` is valid PGML
 - Misses complex Perl patterns: loops, dynamic variables, special functions
+
+
+**Recommendations**: Use linter for structural checks (BEGIN/END, DOCUMENT pairs) and legacy pattern detection (old-style ANS()). Manually verify variable assignment warnings - 81% are false positives from valid Perl code our regex parser doesn't understand.
 
 ### Parser Improvements
 
@@ -45,6 +55,7 @@ Significantly improved variable assignment detection to reduce false positives:
 - Add hash element assignment: `$hash{key} = value` (autovivification)
 - Create `test_parser_improvements.py` with comprehensive tests
 - Fix ASCII compliance in documentation (replace emojis with checkboxes)
+
 
 **Results**:
 - Files with issues: 171 -> 63 (63% reduction)
@@ -68,6 +79,7 @@ Significantly improved variable assignment detection to reduce false positives:
 - Align parser newline index test expectation with current implementation
 - Organize output files into `output/` directory
 - Move testing documentation to `docs/`
+
 
 ## 2026-01-18 - v26.01b1
 
