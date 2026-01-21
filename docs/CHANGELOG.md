@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-01-21 - pgml_ans_style plugin and examples documentation
+
+- Add `pgml_ans_style` plugin to detect mixed PGML/PG answer styles.
+- Warn when `ANS()` calls appear after `END_PGML` blocks instead of using pure PGML inline answer specs like `[_]{$answer}`.
+- Add comprehensive test coverage for the new plugin in [tests/test_pgml_lint_plugins_pgml_ans_style.py](tests/test_pgml_lint_plugins_pgml_ans_style.py).
+- Add `pgml_ans_style` documentation to [docs/PGML_LINT_PLUGINS.md](docs/PGML_LINT_PLUGINS.md) with good/bad examples.
+- Create [docs/PGML_LINT_EXAMPLES.md](docs/PGML_LINT_EXAMPLES.md) with comprehensive good vs bad code examples for all lint rules.
+- Fix merge conflict in [tests/test_bandit_security.py](tests/test_bandit_security.py).
+
 ## 2026-01-19 - Testing, validation, and parser improvements
 
 ### Testing and Validation
