@@ -1,6 +1,6 @@
 # webwork-pgml-linter
 
-A static linter for WeBWorK `.pg` problem files that checks PGML markup and common authoring mistakes for instructors and content authors.
+A static linter for WeBWorK `.pg` problem files that enforces modern PGML standards and flags legacy PG syntax. Helps instructors and content authors write clean, maintainable PGML problems by detecting common authoring mistakes and deprecated patterns.
 
 ## Documentation
 

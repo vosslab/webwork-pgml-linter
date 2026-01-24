@@ -1,5 +1,63 @@
 # Changelog
 
+## 2026-01-24 - Legacy PG syntax detection (major update)
+
+### New Plugins for Legacy PG Detection
+
+This release adds comprehensive detection of deprecated PG syntax patterns, emphasizing that **this linter enforces modern PGML standards**:
+
+1. **`pgml_text_blocks`** - Flag legacy `BEGIN_TEXT/END_TEXT` blocks
+   - Warns that TEXT blocks should be migrated to `BEGIN_PGML/END_PGML`
+   - Test coverage: [tests/test_pgml_lint_plugins_pgml_text_blocks.py](tests/test_pgml_lint_plugins_pgml_text_blocks.py)
+
+2. **`pgml_html_in_text`** - Detect raw HTML in PGML text
+   - Flags HTML tags (`<strong>`, `<em>`, `<br>`, `<sub>`, `<sup>`, tables, etc.) that will be stripped or mangled
+   - Detects HTML entities (`&nbsp;`, `&lt;`, `&copy;`, etc.) that may be corrupted
+   - Excludes HTML inside `[@ @]*` blocks (where it's allowed)
+   - Suggests PGML/LaTeX alternatives for each problematic tag
+   - Test coverage: [tests/test_pgml_lint_plugins_pgml_html_in_text.py](tests/test_pgml_lint_plugins_pgml_html_in_text.py)
+
+3. **`pgml_ans_rule`** - Detect legacy `ans_rule()` function
+   - Flags old-style answer blank syntax that should use PGML `[_]{$answer}` instead
+   - Test coverage: [tests/test_pgml_lint_plugins_pgml_ans_rule.py](tests/test_pgml_lint_plugins_pgml_ans_rule.py)
+
+4. **`pgml_br_variable`** - Detect legacy `$BR` variable
+   - Flags old-style line breaks that should use blank lines in PGML
+   - Test coverage: [tests/test_pgml_lint_plugins_pgml_br_variable.py](tests/test_pgml_lint_plugins_pgml_br_variable.py)
+
+5. **`pgml_modes_html_escape`** - Detect MODES HTML escaped in interpolation
+   - Tracks variables assigned HTML from `MODES(HTML => '<span>...', ...)`
+   - Warns when those variables are used with `[$var]` interpolation (which escapes HTML)
+   - Suggests using `[@ $var @]*` instead to render HTML correctly
+   - Prevents subtle bug where HTML appears as `&lt;span&gt;` instead of rendering
+   - Test coverage: [tests/test_pgml_lint_plugins_pgml_modes_html_escape.py](tests/test_pgml_lint_plugins_pgml_modes_html_escape.py)
+
+6. **`pgml_old_answer_checkers`** - Detect legacy answer checker functions
+   - Flags deprecated `num_cmp()`, `str_cmp()`, `fun_cmp()` and their variants
+   - Suggests using MathObjects with `->cmp()` method instead
+   - Encourages migration from old answer checkers to modern MathObjects
+   - Test coverage: [tests/test_pgml_lint_plugins_pgml_old_answer_checkers.py](tests/test_pgml_lint_plugins_pgml_old_answer_checkers.py)
+
+7. **`pgml_solution_hint_macros`** - Detect legacy SOLUTION/HINT macros
+   - Flags deprecated `SOLUTION(EV3(<<'END'))` and `HINT(EV3(<<'END'))` patterns
+   - Suggests using `BEGIN_PGML_SOLUTION` and `BEGIN_PGML_HINT` blocks instead
+   - Promotes cleaner, more maintainable PGML syntax
+   - Test coverage: [tests/test_pgml_lint_plugins_pgml_solution_hint_macros.py](tests/test_pgml_lint_plugins_pgml_solution_hint_macros.py)
+
+### Documentation Updates
+
+- Update [README.md](README.md): Clarify linter enforces modern PGML and flags legacy PG syntax
+- Update [docs/PGML_LINT.md](docs/PGML_LINT.md): Add "Purpose" section emphasizing modern PGML enforcement
+- Update [docs/PGML_LINT_PLUGINS.md](docs/PGML_LINT_PLUGINS.md):
+  - Add documentation for all four new plugins
+  - Include migration guides showing legacy PG -> modern PGML conversions
+  - Add HTML/PGML conversion table for common tags
+
+### Test Results
+
+- All plugin tests pass: 65 total tests across all plugins
+- Full test suite passes: 114 tests
+
 ## 2026-01-21 - pgml_ans_style plugin and examples documentation
 
 - Add `pgml_ans_style` plugin to detect mixed PGML/PG answer styles.
@@ -8,6 +66,8 @@
 - Add `pgml_ans_style` documentation to [docs/PGML_LINT_PLUGINS.md](docs/PGML_LINT_PLUGINS.md) with good/bad examples.
 - Create [docs/PGML_LINT_EXAMPLES.md](docs/PGML_LINT_EXAMPLES.md) with comprehensive good vs bad code examples for all lint rules.
 - Fix merge conflict in [tests/test_bandit_security.py](tests/test_bandit_security.py).
+- Move training-set analysis scripts from repo root into [training_set_tools/](../training_set_tools/).
+- Document training-set workflow in [training_set_tools/README.md](../training_set_tools/README.md) and route outputs to `training_set_tools/output/`.
 
 ## 2026-01-19 - Testing, validation, and parser improvements
 

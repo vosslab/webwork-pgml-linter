@@ -2,6 +2,16 @@
 
 `tools/webwork_pgml_simple_lint.py` is a static analysis tool for WeBWorK `.pg` files with PGML validation. It works offline without requiring the PG library.
 
+## Purpose
+
+**This linter enforces modern PGML standards and flags legacy PG syntax.** It helps:
+- Identify deprecated patterns (e.g., BEGIN_TEXT blocks, mixed answer styles)
+- Ensure compliance with modern PGML best practices
+- Detect common authoring mistakes in PGML markup
+- Migrate legacy PG files to clean, maintainable PGML
+
+If you're maintaining older PG files, this linter will highlight areas that should be updated to modern PGML syntax.
+
 ## Quick Start
 
 ```bash
@@ -43,6 +53,36 @@ python3 tools/webwork_pgml_simple_lint.py -q -d problems/
 **PGML heredoc terminators** (`pgml_heredocs` plugin)
 - Detects unterminated PGML heredocs like `PGML::Format(<<END_PGML)`
 - Example error: `PGML heredoc terminator 'END_PGML' not found`
+
+**Deprecated TEXT blocks** (`pgml_text_blocks` plugin)
+- Flags legacy `BEGIN_TEXT/END_TEXT` blocks that should be migrated to PGML
+- Example warning: `BEGIN_TEXT is deprecated legacy PG syntax; use BEGIN_PGML with PGML.pl for modern WebWork problems`
+
+**Raw HTML in PGML** (`pgml_html_in_text` plugin)
+- Detects HTML tags and entities in PGML text that will be stripped or mangled
+- Flags `<strong>`, `<em>`, `<br>`, `<sub>`, `<sup>`, table tags, HTML entities
+- Suggests PGML or LaTeX alternatives
+
+**Legacy ans_rule()** (`pgml_ans_rule` plugin)
+- Detects old-style `ans_rule()` function calls
+- Suggests using PGML inline answer blanks `[_]{$answer}` instead
+
+**Legacy $BR variable** (`pgml_br_variable` plugin)
+- Detects old-style `$BR` line break variable
+- Suggests using blank lines in PGML for paragraph breaks
+
+**MODES HTML escaping** (`pgml_modes_html_escape` plugin)
+- Detects when HTML from `MODES()` is incorrectly used with `[$var]` interpolation
+- Warns that `[$var]` escapes HTML; should use `[@ $var @]*` instead
+- Prevents subtle bug where HTML appears as escaped text
+
+**Legacy answer checkers** (`pgml_old_answer_checkers` plugin)
+- Detects deprecated `num_cmp()`, `str_cmp()`, `fun_cmp()` functions
+- Suggests using MathObjects with `->cmp()` method instead
+
+**Legacy SOLUTION/HINT macros** (`pgml_solution_hint_macros` plugin)
+- Detects deprecated `SOLUTION(EV3(<<'END'))` and `HINT(EV3(<<'END'))` patterns
+- Suggests using `BEGIN_PGML_SOLUTION` and `BEGIN_PGML_HINT` blocks instead
 
 ### PGML Syntax
 
@@ -93,11 +133,13 @@ The linter runs these checks automatically:
 | Block pairing | BEGIN_PGML/END_PGML properly matched |
 | Heredoc terminators | PGML heredocs properly closed |
 | DOCUMENT pairing | DOCUMENT()/ENDDOCUMENT() balanced |
+| Deprecated TEXT blocks | Flags legacy BEGIN_TEXT/END_TEXT syntax |
 | Required macros | PGML.pl loaded when PGML is used |
 | Macro coverage | Functions have required macro files |
 | Inline markers | [@ @] code blocks properly paired |
 | Blank syntax | Answer blanks have proper specs |
 | Variable references | Blanks don't reference undefined variables |
+| Answer style consistency | Detects mixed PGML/ANS() styles |
 
 ## For Developers
 

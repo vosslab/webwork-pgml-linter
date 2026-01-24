@@ -17,6 +17,13 @@ This document describes each built-in plugin, what it checks, and example issues
 | `pgml_brackets` | No | PGML bracket balance |
 | `pgml_blank_assignments` | Yes | Variable assignment checking |
 | `pgml_ans_style` | Yes | PGML answer style consistency |
+| `pgml_text_blocks` | Yes | Deprecated TEXT blocks |
+| `pgml_html_in_text` | Yes | Raw HTML in PGML text |
+| `pgml_ans_rule` | Yes | Legacy ans_rule() function |
+| `pgml_br_variable` | Yes | Legacy $BR variable |
+| `pgml_modes_html_escape` | Yes | MODES HTML escaped in interpolation |
+| `pgml_old_answer_checkers` | Yes | Legacy answer checker functions |
+| `pgml_solution_hint_macros` | Yes | Legacy SOLUTION/HINT macros |
 
 ## block_markers
 
@@ -277,6 +284,340 @@ ANS($answer->cmp());
 ```
 
 **Note:** For RadioButtons and similar objects, use `[_]{$rb}` instead of displaying with `[@ $rb->buttons() @]*` and then calling `ANS($rb->cmp())`.
+
+## pgml_text_blocks
+
+**File:** `pgml_lint/plugins/pgml_text_blocks.py`
+
+**Purpose:** Flags deprecated BEGIN_TEXT/END_TEXT blocks as legacy PG syntax.
+
+**Checks:**
+- Presence of `BEGIN_TEXT` markers in the file
+
+**Rationale:**
+This linter enforces modern PGML standards for WebWork problems. `BEGIN_TEXT/END_TEXT` blocks are legacy PG syntax that should be migrated to `BEGIN_PGML/END_PGML` with PGML.pl. Modern PGML provides:
+- Better LaTeX integration
+- Cleaner inline answer syntax
+- More consistent markup language
+- Improved readability
+
+**Example Issues:**
+```
+file.pg:15: WARNING: BEGIN_TEXT is deprecated legacy PG syntax; use BEGIN_PGML with PGML.pl for modern WebWork problems
+```
+
+**Migration Guide:**
+Replace TEXT blocks with PGML blocks:
+
+**Old (Legacy PG):**
+```perl
+BEGIN_TEXT
+Compute \(2 + 2\).
+$BR
+Answer: \{ans_rule(10)\}
+END_TEXT
+```
+
+**New (Modern PGML):**
+```perl
+BEGIN_PGML
+Compute [` 2 + 2 `].
+
+Answer: [_]{$answer}
+END_PGML
+```
+
+## pgml_html_in_text
+
+**File:** `pgml_lint/plugins/pgml_html_in_text.py`
+
+**Purpose:** Detects raw HTML tags and entities in PGML text that will be stripped or mangled.
+
+**Checks:**
+- Problematic HTML formatting tags: `<strong>`, `<b>`, `<i>`, `<em>`, `<u>`
+- HTML structure tags: `<p>`, `<br>`, `<div>` (outside `[@ @]*` blocks)
+- Math-related tags: `<sub>`, `<sup>`
+- Table tags: `<table>`, `<tr>`, `<td>`, `<th>`
+- Other deprecated tags: `<font>`, `<center>`, `<a>`
+- HTML entities: `&nbsp;`, `&lt;`, `&gt;`, `&copy;`, etc.
+
+**Why This Matters:**
+PGML has its own markup language. Raw HTML in PGML text gets stripped or mangled during parsing, leading to unexpected output. Authors should use PGML markup instead.
+
+**Example Issues:**
+```
+file.pg:25: WARNING: Raw HTML <strong> tag in PGML text will be stripped or mangled; use *bold* for bold text
+file.pg:27: WARNING: Raw HTML <sub> tag in PGML text will be stripped or mangled; use LaTeX subscripts like [` x_2 `] for math
+file.pg:30: WARNING: HTML entity '&nbsp;' in PGML text may be mangled; use Unicode characters or LaTeX instead
+```
+
+**HTML -> PGML Migration Guide:**
+
+| HTML | PGML Alternative |
+|------|------------------|
+| `<strong>text</strong>` or `<b>text</b>` | `*text*` (bold) |
+| `<em>text</em>` or `<i>text</i>` | `_text_` (italic) |
+| `<sub>2</sub>` | `` [` H_2O `] `` (LaTeX subscript) |
+| `<sup>2</sup>` | `` [` x^2 `] `` (LaTeX superscript) |
+| `<br>` or `<br/>` | Blank line in PGML |
+| `<p>text</p>` | Blank lines for paragraphs |
+| `<table>` | `DataTable()` or `LayoutTable()` from niceTables.pl |
+| `&nbsp;` | Use actual space or `~` in LaTeX |
+| `&lt;` or `&gt;` | Use `<` or `>` directly, or in LaTeX mode |
+
+**Important Exception:**
+HTML generated inside `[@ @]*` blocks is allowed and will not trigger warnings:
+```perl
+BEGIN_PGML
+This is okay: [@ '<span class="highlight">text</span>' @]*
+END_PGML
+```
+
+## pgml_ans_rule
+
+**File:** `pgml_lint/plugins/pgml_ans_rule.py`
+
+**Purpose:** Detects legacy ans_rule() function calls that should be replaced with PGML inline answer blanks.
+
+**Checks:**
+- `ans_rule()` function calls anywhere in the code
+
+**Rationale:**
+`ans_rule()` is old-style PG syntax typically used with BEGIN_TEXT blocks. Modern PGML provides inline answer syntax that's cleaner and more readable.
+
+**Example Issues:**
+```
+file.pg:15: WARNING: ans_rule() is deprecated legacy PG syntax; use PGML inline answer blanks like [_]{$answer} instead
+```
+
+**Migration Guide:**
+
+**Old (Legacy PG):**
+```perl
+BEGIN_TEXT
+Enter your answer: \{ans_rule(20)\}
+END_TEXT
+
+ANS($answer->cmp());
+```
+
+**New (Modern PGML):**
+```perl
+BEGIN_PGML
+Enter your answer: [_____]{$answer}
+END_PGML
+```
+
+## pgml_br_variable
+
+**File:** `pgml_lint/plugins/pgml_br_variable.py`
+
+**Purpose:** Detects legacy $BR variable usage for line breaks.
+
+**Checks:**
+- `$BR` variable references anywhere in the code
+
+**Rationale:**
+`$BR` is old-style PG syntax for inserting line breaks. Modern PGML uses blank lines for paragraph breaks, making the markup more readable.
+
+**Example Issues:**
+```
+file.pg:20: WARNING: $BR is deprecated legacy PG syntax; use blank lines in PGML for paragraph breaks
+```
+
+**Migration Guide:**
+
+**Old (Legacy PG):**
+```perl
+BEGIN_TEXT
+Line one
+$BR
+Line two
+$BR
+Line three
+END_TEXT
+```
+
+**New (Modern PGML):**
+```perl
+BEGIN_PGML
+Line one
+
+Line two
+
+Line three
+END_PGML
+```
+
+**Note:** For spacing within a paragraph, just use regular line breaks in the source. PGML treats single line breaks as spaces, and double line breaks (blank lines) as paragraph breaks.
+
+## pgml_modes_html_escape
+
+**File:** `pgml_lint/plugins/pgml_modes_html_escape.py`
+
+**Purpose:** Detects when HTML from MODES() is incorrectly used with `[$var]` interpolation, causing it to be escaped.
+
+**The Problem:**
+PGML automatically escapes any HTML that arrives via `[$var]` interpolation, even if the string was produced by `MODES(HTML => '<span ...>', ...)`. This means your carefully formatted HTML will be displayed as literal text like `&lt;span ...&gt;` instead of being rendered.
+
+**Checks:**
+- Variables assigned from `MODES()` with HTML content
+- Uses of those variables in `[$var]` interpolation within PGML blocks
+- Does NOT warn about `[@ $var @]*` (which correctly renders HTML)
+
+**Example Issues:**
+```
+file.pg:25: WARNING: Variable $html contains HTML from MODES() but is used in [$var] interpolation which escapes HTML; use [@ $html @]* instead to render HTML
+```
+
+**The Bug Explained:**
+
+**Incorrect (HTML gets escaped):**
+```perl
+$formatted = MODES(
+	TeX => '\\textbf{bold}',
+	HTML => '<strong>bold</strong>'
+);
+
+BEGIN_PGML
+This displays: &lt;strong&gt;bold&lt;/strong&gt;
+[$formatted]
+END_PGML
+```
+
+**Correct (HTML renders properly):**
+```perl
+$formatted = MODES(
+	TeX => '\\textbf{bold}',
+	HTML => '<strong>bold</strong>'
+);
+
+BEGIN_PGML
+This displays: **bold** (rendered)
+[@ $formatted @]*
+END_PGML
+```
+
+**Why This Matters:**
+This is a subtle bug that's easy to miss during development. The problem won't show up until you view the rendered page and notice escaped HTML tags appearing as literal text. This plugin catches it at lint time.
+
+**Technical Details:**
+- `[$var]` - PGML interpolation that escapes HTML for safety
+- `[@ $var @]*` - Inline code block that outputs raw HTML/TeX
+- MODES() often produces HTML strings, which need the raw output syntax
+
+## pgml_old_answer_checkers
+
+**File:** `pgml_lint/plugins/pgml_old_answer_checkers.py`
+
+**Purpose:** Detects legacy answer checker functions that should be replaced with MathObjects.
+
+**Checks:**
+- `num_cmp()` - Old numeric answer checker
+- `str_cmp()` - Old string answer checker
+- `fun_cmp()` - Old function answer checker
+- `std_num_cmp()`, `std_str_cmp()`, `std_fun_cmp()` - Standard variants
+- `strict_num_cmp()`, `strict_str_cmp()` - Strict variants
+
+**Rationale:**
+Old answer checker functions are deprecated in favor of MathObjects, which provide better type safety, more consistent behavior, and cleaner syntax.
+
+**Example Issues:**
+```
+file.pg:15: WARNING: num_cmp() is deprecated legacy PG syntax; use MathObjects with ->cmp() method instead (e.g., $answer->cmp())
+file.pg:20: WARNING: str_cmp() is deprecated legacy PG syntax; use MathObjects with ->cmp() method instead (e.g., $answer->cmp())
+```
+
+**Migration Guide:**
+
+**Old (Legacy PG):**
+```perl
+$answer = 42;
+ANS(num_cmp($answer));
+
+$string = "correct";
+ANS(str_cmp($string));
+
+$formula = "x^2 + 1";
+ANS(fun_cmp($formula, var => 'x'));
+```
+
+**New (Modern MathObjects):**
+```perl
+$answer = Compute("42");
+ANS($answer->cmp());
+
+$string = String("correct");
+ANS($string->cmp());
+
+$formula = Formula("x^2 + 1");
+ANS($formula->cmp());
+```
+
+**In PGML (even simpler):**
+```perl
+$answer = Compute("42");
+
+BEGIN_PGML
+Answer: [_]{$answer}
+END_PGML
+```
+
+## pgml_solution_hint_macros
+
+**File:** `pgml_lint/plugins/pgml_solution_hint_macros.py`
+
+**Purpose:** Detects legacy SOLUTION() and HINT() macros that should use PGML blocks.
+
+**Checks:**
+- `SOLUTION()` macro calls (case-insensitive)
+- `HINT()` macro calls (case-insensitive)
+
+**Rationale:**
+Old-style `SOLUTION(EV3(<<'END'))` and `HINT(EV3(<<'END'))` macros are deprecated. Modern PGML provides cleaner block syntax for solutions and hints.
+
+**Example Issues:**
+```
+file.pg:25: WARNING: SOLUTION() macro is deprecated legacy PG syntax; use BEGIN_PGML_SOLUTION...END_PGML_SOLUTION blocks instead
+file.pg:30: WARNING: HINT() macro is deprecated legacy PG syntax; use BEGIN_PGML_HINT...END_PGML_HINT blocks instead
+```
+
+**Migration Guide:**
+
+**Old (Legacy PG):**
+```perl
+SOLUTION(EV3(<<'END_SOLUTION'));
+To solve this problem:
+1. First step
+2. Second step
+The answer is $answer.
+END_SOLUTION
+
+HINT(EV3(<<'END_HINT'));
+Remember to consider all cases.
+END_HINT
+```
+
+**New (Modern PGML):**
+```perl
+BEGIN_PGML_SOLUTION
+To solve this problem:
+1. First step
+2. Second step
+
+The answer is [$answer].
+END_PGML_SOLUTION
+
+BEGIN_PGML_HINT
+Remember to consider all cases.
+END_PGML_HINT
+```
+
+**Benefits of PGML blocks:**
+- Cleaner syntax (no EV3, no heredoc terminators)
+- PGML markup support (lists, math, formatting)
+- Consistent with modern PGML style
+- Easier to read and maintain
 
 ## Plugin Execution Order
 

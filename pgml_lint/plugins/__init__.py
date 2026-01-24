@@ -12,4 +12,11 @@ BUILTIN_PLUGINS = [
 	"pgml_lint.plugins.pgml_brackets",
 	"pgml_lint.plugins.pgml_blank_assignments",
 	"pgml_lint.plugins.pgml_ans_style",
+	"pgml_lint.plugins.pgml_text_blocks",
+	"pgml_lint.plugins.pgml_html_in_text",
+	"pgml_lint.plugins.pgml_ans_rule",
+	"pgml_lint.plugins.pgml_br_variable",
+	"pgml_lint.plugins.pgml_modes_html_escape",
+	"pgml_lint.plugins.pgml_old_answer_checkers",
+	"pgml_lint.plugins.pgml_solution_hint_macros",
 ]
