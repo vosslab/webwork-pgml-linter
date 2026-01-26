@@ -54,3 +54,17 @@ def test_format_issue_with_line_no_plugin() -> None:
 	issue = {"severity": "ERROR", "message": "bad", "line": 10}
 	formatted = pgml_lint.core.format_issue("file.pg", issue, show_plugin=True)
 	assert formatted == "file.pg:10: ERROR: bad"
+
+
+#============================================
+
+def test_format_issue_with_excerpt_verbose() -> None:
+	issue = {
+		"severity": "ERROR",
+		"message": "bad",
+		"line": 10,
+		"plugin": "x",
+		"excerpt": "...oops...",
+	}
+	formatted = pgml_lint.core.format_issue("file.pg", issue, show_plugin=True)
+	assert formatted == "file.pg:10: ERROR(x): bad | context: ...oops..."

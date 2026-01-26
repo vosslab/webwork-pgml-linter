@@ -78,6 +78,9 @@ def format_issue(file_path: str, issue: dict[str, object], show_plugin: bool) ->
 	line = issue.get("line")
 	if isinstance(line, int):
 		formatted = f"{file_path}:{line}: {severity}: {message}"
+		excerpt = issue.get("excerpt")
+		if show_plugin and isinstance(excerpt, str) and excerpt:
+			formatted = f"{formatted} | context: {excerpt}"
 		return formatted
 	formatted = f"{file_path}: {severity}: {message}"
 	return formatted

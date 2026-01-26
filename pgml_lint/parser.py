@@ -70,6 +70,25 @@ def pos_to_line(newlines: list[int], pos: int) -> int:
 #============================================
 
 
+def pos_to_col(newlines: list[int], pos: int) -> int:
+	"""
+	Map a byte offset to 1-based column number using a newline index.
+
+	Args:
+		newlines: Sorted newline positions.
+		pos: Character position in text.
+
+	Returns:
+		int: 1-based column number.
+	"""
+	line_idx = bisect.bisect_left(newlines, pos)
+	line_start = newlines[line_idx - 1] + 1 if line_idx > 0 else 0
+	return pos - line_start + 1
+
+
+#============================================
+
+
 def _scan_heredoc_terminator(line: str) -> str | None:
 	"""
 	Detect a heredoc introducer outside of strings and return its terminator token.

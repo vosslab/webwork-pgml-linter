@@ -268,11 +268,13 @@ file.pg:20: WARNING: MODES() used inside [@ @] block; MODES returns 1 in eval co
 **Checks:**
 - `[@ ... @]*` blocks containing PGML wrapper syntax like `[<` or `>]{`
 - Nested `BEGIN_PGML` or `END_PGML` inside inline code
+- PGML interpolation patterns like `[$answer]` inside inline string literals
 
 **Example Issues:**
 ```
-file.pg:42: ERROR: PGML tag wrapper syntax found inside [@ @] block
+file.pg:42: ERROR: PGML tag wrapper token '[<' found inside [@ @] block
 file.pg:44: ERROR: Nested BEGIN_PGML found inside [@ @] block
+file.pg:46: ERROR: PGML interpolation [$answer_html] found inside [@ @] block; PGML parses once and will not re-parse strings
 ```
 
 ## pgml_inline_braces

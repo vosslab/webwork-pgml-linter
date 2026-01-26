@@ -21,7 +21,7 @@ python3 tools/webwork_pgml_simple_lint.py -i path/to/file.pg
 # Check all .pg files in a directory
 python3 tools/webwork_pgml_simple_lint.py -d problems/
 
-# Verbose output (shows what checks are running)
+# Verbose output (shows what checks are running and context excerpts)
 python3 tools/webwork_pgml_simple_lint.py -v -i file.pg
 
 # Quiet mode (only errors/warnings, no summary)
@@ -34,7 +34,7 @@ python3 tools/webwork_pgml_simple_lint.py -q -d problems/
 |--------|-------------|
 | `-i`, `--input FILE` | Check a single .pg file |
 | `-d`, `--directory DIR` | Check all .pg files in directory (default: current) |
-| `-v`, `--verbose` | Show more details |
+| `-v`, `--verbose` | Show more details (plugin ids and excerpts when available) |
 | `-q`, `--quiet` | Only show problems, no summary |
 
 ## What the Linter Checks

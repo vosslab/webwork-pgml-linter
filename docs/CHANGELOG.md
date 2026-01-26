@@ -39,6 +39,10 @@
 - Expand `pgml_html_policy` to flag disallowed tags used inside PGML tag wrappers, plus tests and docs updates.
 - Extend `pgml_mojibake` detection to flag standalone mojibake markers (U+00C2/U+00C3) with test coverage updates.
 - Fix pyflakes warnings by removing empty f-strings in training-set tools and an unused `newlines` variable in `pgml_tex_color`.
+- Expand `pgml_inline_pgml_syntax` to flag PGML interpolation strings inside `[@ @]` blocks, plus tests and docs updates.
+- Refine `pgml_inline_pgml_syntax` messaging to include the specific wrapper token or interpolation variable and avoid duplicate reports per token.
+- Add optional verbose context excerpts for issues with column data, including new `pos_to_col` support and inline syntax column reporting.
+- Strip leading whitespace from verbose context excerpts to make them easier to scan.
 
 ## 2026-01-24 - Legacy PG syntax detection (major update)
 

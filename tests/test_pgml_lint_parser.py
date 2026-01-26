@@ -12,6 +12,10 @@ def test_newline_index_and_pos_to_line() -> None:
 	assert pgml_lint.parser.pos_to_line(newlines, 2) == 2
 	assert pgml_lint.parser.pos_to_line(newlines, 4) == 3
 	assert pgml_lint.parser.pos_to_line(newlines, 5) == 3
+	assert pgml_lint.parser.pos_to_col(newlines, 0) == 1
+	assert pgml_lint.parser.pos_to_col(newlines, 1) == 2
+	assert pgml_lint.parser.pos_to_col(newlines, 2) == 1
+	assert pgml_lint.parser.pos_to_col(newlines, 4) == 1
 
 
 #============================================

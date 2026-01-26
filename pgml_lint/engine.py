@@ -80,6 +80,50 @@ def _sort_issues(issues: list[dict[str, object]]) -> list[dict[str, object]]:
 #============================================
 
 
+def _attach_issue_excerpts(
+	text: str,
+	issues: list[dict[str, object]],
+	window: int = 40,
+) -> list[dict[str, object]]:
+	"""
+	Attach excerpt strings for issues with line and column info.
+
+	Args:
+		text: Full file contents.
+		issues: Issue list.
+		window: Characters to include before/after the column.
+
+	Returns:
+		list[dict[str, object]]: Updated issue list.
+	"""
+	lines = text.splitlines()
+	for issue in issues:
+		line = issue.get("line")
+		column = issue.get("column")
+		if not isinstance(line, int) or not isinstance(column, int):
+			continue
+		if line < 1 or line > len(lines):
+			continue
+		line_text = lines[line - 1]
+		if not line_text:
+			continue
+		col_idx = max(0, min(len(line_text), column - 1))
+		start = max(0, col_idx - window)
+		end = min(len(line_text), col_idx + window)
+		excerpt = line_text[start:end].lstrip()
+		if not excerpt:
+			continue
+		if start > 0:
+			excerpt = "..." + excerpt
+		if end < len(line_text):
+			excerpt = excerpt + "..."
+		issue["excerpt"] = excerpt
+	return issues
+
+
+#============================================
+
+
 def run_plugins(
 	context: dict[str, object],
 	plugins: list[dict[str, object]],
@@ -131,6 +175,7 @@ def lint_text(
 	"""
 	context = build_context(text, file_path, block_rules, macro_rules)
 	issues = run_plugins(context, plugins)
+	issues = _attach_issue_excerpts(text, issues)
 	return issues
 
 

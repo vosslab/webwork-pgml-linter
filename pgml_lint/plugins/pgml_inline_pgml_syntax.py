@@ -1,3 +1,6 @@
+# Standard Library
+import re
+
 # Local modules
 import pgml_lint.parser
 import pgml_lint.pgml
@@ -7,12 +10,15 @@ PLUGIN_NAME = "PGML syntax inside inline code"
 DEFAULT_ENABLED = True
 
 FORBIDDEN_SNIPPETS = [
-	("[<", "PGML tag wrapper syntax found inside [@ @] block"),
-	(">]{", "PGML tag wrapper syntax found inside [@ @] block"),
-	("}{", "PGML tag wrapper syntax found inside [@ @] block"),
+	("[<", "PGML tag wrapper token '[<' found inside [@ @] block"),
+	(">]{", "PGML tag wrapper token '>]{' found inside [@ @] block"),
+	("}{", "PGML tag wrapper token '}{' found inside [@ @] block"),
 	("BEGIN_PGML", "Nested BEGIN_PGML found inside [@ @] block"),
 	("END_PGML", "Nested END_PGML found inside [@ @] block"),
 ]
+
+STRING_RX = re.compile(r"('([^'\\\\]|\\\\.)*'|\"([^\"\\\\]|\\\\.)*\")")
+INTERPOLATION_RX = re.compile(r"\[\s*\$([A-Za-z_][A-Za-z0-9_]*)\s*\]")
 
 
 #============================================
@@ -78,13 +84,49 @@ def run(context: dict[str, object]) -> list[dict[str, object]]:
 				continue
 			code = region_text[code_start:code_end]
 			base_offset = start + code_start
+			seen_snippets: set[str] = set()
+			seen_interpolations: set[str] = set()
 
 			for snippet, message in FORBIDDEN_SNIPPETS:
+				if snippet in seen_snippets:
+					continue
 				idx = code.find(snippet)
 				if idx == -1:
 					continue
-				line = pgml_lint.parser.pos_to_line(newlines, base_offset + idx)
-				issue = {"severity": "ERROR", "message": message, "line": line}
+				seen_snippets.add(snippet)
+				pos = base_offset + idx
+				line = pgml_lint.parser.pos_to_line(newlines, pos)
+				column = pgml_lint.parser.pos_to_col(newlines, pos)
+				issue = {
+					"severity": "ERROR",
+					"message": message,
+					"line": line,
+					"column": column,
+				}
 				issues.append(issue)
+
+			for string_match in STRING_RX.finditer(code):
+				literal = string_match.group(0)
+				for interpolated in INTERPOLATION_RX.finditer(literal):
+					name = interpolated.group(1)
+					if name in seen_interpolations:
+						continue
+					seen_interpolations.add(name)
+					idx = string_match.start() + interpolated.start()
+					pos = base_offset + idx
+					line = pgml_lint.parser.pos_to_line(newlines, pos)
+					column = pgml_lint.parser.pos_to_col(newlines, pos)
+					pgml_ref = "[$" + name + "]"
+					message = (
+						f"PGML interpolation {pgml_ref} found inside [@ @] block; "
+						"PGML parses once and will not re-parse strings"
+					)
+					issue = {
+						"severity": "ERROR",
+						"message": message,
+						"line": line,
+						"column": column,
+					}
+					issues.append(issue)
 
 	return issues
