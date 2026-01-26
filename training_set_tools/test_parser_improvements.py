@@ -124,10 +124,10 @@ def main():
 		print("="*70)
 		print()
 		print("The parser now correctly handles:")
-		print("  • List assignments: ($a, $b) = func()")
-		print("  • Array autovivification: $arr[0] = value")
-		print("  • Hash autovivification: $hash{key} = value")
-		print("  • Complex loop patterns")
+		print("  * List assignments: ($a, $b) = func()")
+		print("  * Array autovivification: $arr[0] = value")
+		print("  * Hash autovivification: $hash{key} = value")
+		print("  * Complex loop patterns")
 		print()
 
 	except AssertionError as e:

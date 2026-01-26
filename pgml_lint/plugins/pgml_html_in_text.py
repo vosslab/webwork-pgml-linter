@@ -26,17 +26,16 @@ PROBLEMATIC_TAGS = {
 	'ul': 'use PGML list syntax',
 	'ol': 'use PGML list syntax',
 	'li': 'use PGML list syntax',
-	'table': 'use DataTable() or LayoutTable() from niceTables.pl',
-	'tr': 'use DataTable() or LayoutTable() from niceTables.pl',
-	'td': 'use DataTable() or LayoutTable() from niceTables.pl',
-	'th': 'use DataTable() or LayoutTable() from niceTables.pl',
 	'font': 'use CSS or PGML markup',
 	'center': 'use PGML alignment syntax',
 	'a': 'use PGML link syntax',
+	'span': 'use PGML tag wrappers or MODES(HTML => ...) with [$var]',
+	'style': 'move styles to HEADER_TEXT or CSS files',
 }
 
 # HTML entities that commonly cause issues
 HTML_ENTITY_RX = re.compile(r'&(?:[a-zA-Z]+|#\d+|#x[0-9a-fA-F]+);')
+TEX2JAX_CLASS_RX = re.compile(r'class\s*=\s*["\'][^"\']*\btex2jax_ignore\b[^"\']*["\']')
 
 
 #============================================
@@ -141,6 +140,20 @@ def run(context: dict[str, object]) -> list[dict[str, object]]:
 			message = (
 				f"HTML entity '{entity}' in PGML text may be mangled; "
 				f"use Unicode characters or LaTeX instead"
+			)
+			issue = {"severity": "WARNING", "message": message, "line": line}
+			issues.append(issue)
+
+		# Check for tex2jax_ignore class usage
+		for match in TEX2JAX_CLASS_RX.finditer(region_text):
+			# Skip if inside inline code span
+			if match.start() < len(mask) and mask[match.start()]:
+				continue
+
+			line = pgml_lint.parser.pos_to_line(newlines, start + match.start())
+			message = (
+				"HTML class \"tex2jax_ignore\" found in PGML text; "
+				"this suppresses MathJax and often indicates rendering problems"
 			)
 			issue = {"severity": "WARNING", "message": message, "line": line}
 			issues.append(issue)

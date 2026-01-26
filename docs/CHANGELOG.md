@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-01-26 - PGML style string quote checks
+
+- Add `pgml_style_string_quotes` plugin to flag PGML style tags in single-quoted Perl strings with unescaped quotes that cause compile errors.
+- Add tests for the new plugin in [tests/test_pgml_lint_plugins_pgml_style_string_quotes.py](../tests/test_pgml_lint_plugins_pgml_style_string_quotes.py).
+- Document the new plugin in [docs/PGML_LINT_PLUGINS.md](PGML_LINT_PLUGINS.md).
+- Warn when `class="tex2jax_ignore"` appears in PGML text via `pgml_html_in_text`, and add coverage in [tests/test_pgml_lint_plugins_pgml_html_in_text.py](../tests/test_pgml_lint_plugins_pgml_html_in_text.py).
+- Add `pgml_inline_braces` to catch unbalanced `{}` inside `[@ ... @]*` blocks, plus tests in [tests/test_pgml_lint_plugins_pgml_inline_braces.py](../tests/test_pgml_lint_plugins_pgml_inline_braces.py).
+- Add `pgml_underscore_emphasis` to warn on unclosed underscore emphasis in PGML text, plus tests in [tests/test_pgml_lint_plugins_pgml_underscore_emphasis.py](../tests/test_pgml_lint_plugins_pgml_underscore_emphasis.py).
+- Add `pgml_html_div` to flag `<div>` tags (including escaped `&lt;div`) in PGML blocks, plus tests in [tests/test_pgml_lint_plugins_pgml_html_div.py](../tests/test_pgml_lint_plugins_pgml_html_div.py).
+- Add `pgml_html_forbidden_tags` to error on table-related HTML tags in PGML blocks, plus tests in [tests/test_pgml_lint_plugins_pgml_html_forbidden_tags.py](../tests/test_pgml_lint_plugins_pgml_html_forbidden_tags.py).
+- Add `pgml_inline_pgml_syntax` to flag PGML wrapper syntax inside `[@ @]*` blocks, plus tests in [tests/test_pgml_lint_plugins_pgml_inline_pgml_syntax.py](../tests/test_pgml_lint_plugins_pgml_inline_pgml_syntax.py).
+- Add `pgml_label_dot` to warn on `A.` label construction, plus tests in [tests/test_pgml_lint_plugins_pgml_label_dot.py](../tests/test_pgml_lint_plugins_pgml_label_dot.py).
+- Add `pgml_span_interpolation` to warn when `<span>` HTML variables are not interpolated with `[$var]`, plus tests in [tests/test_pgml_lint_plugins_pgml_span_interpolation.py](../tests/test_pgml_lint_plugins_pgml_span_interpolation.py).
+
 ## 2026-01-24 - Legacy PG syntax detection (major update)
 
 ### New Plugins for Legacy PG Detection

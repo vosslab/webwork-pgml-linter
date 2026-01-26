@@ -60,8 +60,16 @@ python3 tools/webwork_pgml_simple_lint.py -q -d problems/
 
 **Raw HTML in PGML** (`pgml_html_in_text` plugin)
 - Detects HTML tags and entities in PGML text that will be stripped or mangled
-- Flags `<strong>`, `<em>`, `<br>`, `<sub>`, `<sup>`, table tags, HTML entities
+- Flags `<strong>`, `<em>`, `<br>`, `<sub>`, `<sup>`, `<span>`, `<style>`, HTML entities
 - Suggests PGML or LaTeX alternatives
+
+**Forbidden table tags** (`pgml_html_forbidden_tags` plugin)
+- Errors on `<table>`, `<tr>`, `<td>`, `<th>` and related tags anywhere in PGML blocks
+- Suggests `DataTable()` or `LayoutTable()` from `niceTables.pl`
+
+**HTML div tags** (`pgml_html_div` plugin)
+- Flags any `<div>` tags (including escaped ones) found in PGML blocks
+- Useful when div output indicates broken rendering or HTML escaping
 
 **Legacy ans_rule()** (`pgml_ans_rule` plugin)
 - Detects old-style `ans_rule()` function calls
@@ -90,10 +98,21 @@ python3 tools/webwork_pgml_simple_lint.py -q -d problems/
 - Checks `[@` and `@]` pairs are balanced
 - Example warning: `PGML inline open [@ without matching @]`
 
+**Inline PGML syntax** (`pgml_inline_pgml_syntax` plugin)
+- Flags PGML tag wrapper syntax inside `[@ ... @]*` blocks
+- Example error: `PGML tag wrapper syntax found inside [@ @] block`
+
+**Inline brace balance** (`pgml_inline_braces` plugin)
+- Checks `{` and `}` are balanced inside `[@ ... @]*` blocks
+- Example error: `PGML inline code has unclosed '{' brace`
+
 **Answer blank syntax** (`pgml_blanks` plugin)
 - Detects blanks missing answer specs: `[_]` without `{$answer}`
 - Checks for unbalanced braces in blank specs
 - Example warning: `PGML blank missing answer spec`
+
+**Underscore emphasis balance** (`pgml_underscore_emphasis` plugin)
+- Warns when underscore emphasis markers are not closed before paragraph ends
 
 **Bracket balance** (`pgml_brackets` plugin, disabled by default)
 - Checks `[` and `]` balance in PGML content
@@ -117,6 +136,12 @@ python3 tools/webwork_pgml_simple_lint.py -q -d problems/
 - Recognizes scalar (`$var`), array (`@arr`), and hash (`%hash`) assignments
 - Example warning: `PGML blank references $ans without assignment in file`
 
+**Span HTML interpolation** (`pgml_span_interpolation` plugin)
+- Warns when variables containing `<span>` HTML are not interpolated with `[$var]` in PGML
+
+**Label dot trap** (`pgml_label_dot` plugin)
+- Warns when labels are built as `A.` which can trigger PGML list parsing
+
 ## Exit Codes
 
 | Code | Meaning |
@@ -137,8 +162,16 @@ The linter runs these checks automatically:
 | Required macros | PGML.pl loaded when PGML is used |
 | Macro coverage | Functions have required macro files |
 | Inline markers | [@ @] code blocks properly paired |
+| Inline PGML syntax | Inline code does not emit PGML wrappers |
+| Inline brace balance | Inline code braces are balanced |
 | Blank syntax | Answer blanks have proper specs |
+| Underscore emphasis | Underscore markers closed before paragraph ends |
+| Raw HTML in PGML | Flags raw HTML tags and entities in PGML text |
+| Forbidden HTML tags | Forbids table-related tags in PGML blocks |
+| HTML div tags | Flags div tags and escaped div output |
 | Variable references | Blanks don't reference undefined variables |
+| Span interpolation | Span HTML variables appear as [$var] in PGML |
+| Label dot trap | Warns on A. label generation in Perl |
 | Answer style consistency | Detects mixed PGML/ANS() styles |
 
 ## For Developers

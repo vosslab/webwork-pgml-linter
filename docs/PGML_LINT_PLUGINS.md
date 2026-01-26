@@ -13,12 +13,20 @@ This document describes each built-in plugin, what it checks, and example issues
 | `pgml_required_macros` | Yes | PGML requires PGML.pl |
 | `macro_rules` | Yes | Macro requirement coverage |
 | `pgml_inline` | Yes | PGML inline markers [@ @] |
+| `pgml_inline_pgml_syntax` | Yes | PGML syntax inside inline code |
+| `pgml_inline_braces` | Yes | PGML inline brace balance |
 | `pgml_blanks` | Yes | PGML blank specs |
+| `pgml_underscore_emphasis` | Yes | PGML underscore emphasis balance |
 | `pgml_brackets` | No | PGML bracket balance |
 | `pgml_blank_assignments` | Yes | Variable assignment checking |
+| `pgml_label_dot` | Yes | Label dot list parsing trap |
 | `pgml_ans_style` | Yes | PGML answer style consistency |
 | `pgml_text_blocks` | Yes | Deprecated TEXT blocks |
 | `pgml_html_in_text` | Yes | Raw HTML in PGML text |
+| `pgml_html_forbidden_tags` | Yes | Forbidden HTML table tags in PGML |
+| `pgml_html_div` | Yes | HTML div tags in PGML |
+| `pgml_span_interpolation` | Yes | Span HTML interpolation checks |
+| `pgml_style_string_quotes` | Yes | Unescaped quotes in PGML style strings |
 | `pgml_ans_rule` | Yes | Legacy ans_rule() function |
 | `pgml_br_variable` | Yes | Legacy $BR variable |
 | `pgml_modes_html_escape` | Yes | MODES HTML escaped in interpolation |
@@ -163,6 +171,38 @@ file.pg:50: WARNING: PGML inline close @] without matching [@
 
 **Side Effects:** Stores `pgml_inline_spans` in context for downstream plugins.
 
+## pgml_inline_pgml_syntax
+
+**File:** `pgml_lint/plugins/pgml_inline_pgml_syntax.py`
+
+**Purpose:** Detects attempts to emit PGML structural syntax from inside `[@ ... @]*` blocks.
+
+**Checks:**
+- `[@ ... @]*` blocks containing PGML wrapper syntax like `[<` or `>]{`
+- Nested `BEGIN_PGML` or `END_PGML` inside inline code
+
+**Example Issues:**
+```
+file.pg:42: ERROR: PGML tag wrapper syntax found inside [@ @] block
+file.pg:44: ERROR: Nested BEGIN_PGML found inside [@ @] block
+```
+
+## pgml_inline_braces
+
+**File:** `pgml_lint/plugins/pgml_inline_braces.py`
+
+**Purpose:** Detects unbalanced `{` and `}` braces inside PGML inline Perl blocks.
+
+**Checks:**
+- `{` without matching `}` inside `[@ ... @]*`
+- `}` without matching `{` inside `[@ ... @]*`
+
+**Example Issues:**
+```
+file.pg:42: ERROR: PGML inline code has unclosed '{' brace
+file.pg:44: ERROR: PGML inline code has unbalanced '}' brace
+```
+
 ## pgml_blanks
 
 **File:** `pgml_lint/plugins/pgml_blanks.py`
@@ -188,6 +228,21 @@ file.pg:40: WARNING: PGML blank spec is empty
 ```
 
 **Side Effects:** Stores `pgml_blank_vars` and `pgml_blank_spans` in context.
+
+## pgml_underscore_emphasis
+
+**File:** `pgml_lint/plugins/pgml_underscore_emphasis.py`
+
+**Purpose:** Detects unbalanced underscore emphasis markers in PGML text.
+
+**Checks:**
+- `_` emphasis markers that are not closed before paragraph ends
+- Skips inline code, answer blanks, and PGML math spans
+
+**Example Issues:**
+```
+file.pg:30: WARNING: PGML underscore emphasis not closed before paragraph ends
+```
 
 ## pgml_brackets
 
@@ -243,6 +298,20 @@ file.pg: WARNING: PGML blank references $popup without assignment in file
 - Does not recognize all Perl assignment patterns (e.g., `my ($a, $b) = @_`)
 - Does not track scope (may miss local variables in subroutines)
 - May false-positive on variables defined via other means (method calls, etc.)
+
+## pgml_label_dot
+
+**File:** `pgml_lint/plugins/pgml_label_dot.py`
+
+**Purpose:** Warns when labels are built as `A.` which can trigger PGML list parsing.
+
+**Checks:**
+- Perl code patterns like `chr(65 + $i) . '. '`
+
+**Example Issues:**
+```
+file.pg:18: WARNING: Label built as A. (chr(65 + $i) . '. ') can trigger PGML list parsing; use '*A.*' or 'A)' instead
+```
 
 ## pgml_ans_style
 
@@ -335,11 +404,12 @@ END_PGML
 
 **Checks:**
 - Problematic HTML formatting tags: `<strong>`, `<b>`, `<i>`, `<em>`, `<u>`
-- HTML structure tags: `<p>`, `<br>`, `<div>` (outside `[@ @]*` blocks)
+- HTML structure tags: `<p>`, `<br>` (outside `[@ @]*` blocks)
 - Math-related tags: `<sub>`, `<sup>`
-- Table tags: `<table>`, `<tr>`, `<td>`, `<th>`
 - Other deprecated tags: `<font>`, `<center>`, `<a>`
 - HTML entities: `&nbsp;`, `&lt;`, `&gt;`, `&copy;`, etc.
+- MathJax suppression class: `class="tex2jax_ignore"`
+- Span/style tags: `<span>`, `<style>`
 
 **Why This Matters:**
 PGML has its own markup language. Raw HTML in PGML text gets stripped or mangled during parsing, leading to unexpected output. Authors should use PGML markup instead.
@@ -349,6 +419,7 @@ PGML has its own markup language. Raw HTML in PGML text gets stripped or mangled
 file.pg:25: WARNING: Raw HTML <strong> tag in PGML text will be stripped or mangled; use *bold* for bold text
 file.pg:27: WARNING: Raw HTML <sub> tag in PGML text will be stripped or mangled; use LaTeX subscripts like [` x_2 `] for math
 file.pg:30: WARNING: HTML entity '&nbsp;' in PGML text may be mangled; use Unicode characters or LaTeX instead
+file.pg:34: WARNING: HTML class "tex2jax_ignore" found in PGML text; this suppresses MathJax and often indicates rendering problems
 ```
 
 **HTML -> PGML Migration Guide:**
@@ -361,9 +432,10 @@ file.pg:30: WARNING: HTML entity '&nbsp;' in PGML text may be mangled; use Unico
 | `<sup>2</sup>` | `` [` x^2 `] `` (LaTeX superscript) |
 | `<br>` or `<br/>` | Blank line in PGML |
 | `<p>text</p>` | Blank lines for paragraphs |
-| `<table>` | `DataTable()` or `LayoutTable()` from niceTables.pl |
 | `&nbsp;` | Use actual space or `~` in LaTeX |
 | `&lt;` or `&gt;` | Use `<` or `>` directly, or in LaTeX mode |
+
+**Table Tags:** See `pgml_html_forbidden_tags` for table-related HTML checks.
 
 **Important Exception:**
 HTML generated inside `[@ @]*` blocks is allowed and will not trigger warnings:
@@ -372,6 +444,72 @@ BEGIN_PGML
 This is okay: [@ '<span class="highlight">text</span>' @]*
 END_PGML
 ```
+Note: Other plugins like `pgml_html_div` and `pgml_html_forbidden_tags` may still flag specific HTML tags inside inline code.
+
+## pgml_html_div
+
+**File:** `pgml_lint/plugins/pgml_html_div.py`
+
+**Purpose:** Flags any `<div>` tags that appear in PGML output, including inside inline code.
+
+**Checks:**
+- `<div>` or `</div>` tags anywhere in PGML blocks
+- Escaped div tags like `&lt;div ...&gt;`
+
+**Example Issues:**
+```
+file.pg:25: ERROR: HTML <div> tag found in PGML content; avoid HTML divs because they often render incorrectly
+file.pg:27: ERROR: Escaped HTML <div> tag found in PGML output; this indicates HTML is being escaped instead of rendered
+```
+
+## pgml_html_forbidden_tags
+
+**File:** `pgml_lint/plugins/pgml_html_forbidden_tags.py`
+
+**Purpose:** Flags table-related HTML tags inside PGML content, even when embedded in inline code.
+
+**Checks:**
+- `<table>`, `<tr>`, `<td>`, `<th>`
+- `<thead>`, `<tbody>`, `<tfoot>`, `<colgroup>`, `<col>`
+
+**Example Issues:**
+```
+file.pg:25: ERROR: HTML <table> tag found in PGML content; use DataTable() or LayoutTable() from niceTables.pl
+```
+
+## pgml_span_interpolation
+
+**File:** `pgml_lint/plugins/pgml_span_interpolation.py`
+
+**Purpose:** Warns when variables containing `<span>` HTML are never interpolated with `[$var]` in PGML.
+
+**Checks:**
+- Variables assigned strings with `<span ...>` that do not appear in PGML as `[$var]`
+
+**Example Issues:**
+```
+file.pg:18: WARNING: Variable $answers_html contains <span> HTML but is not interpolated with [$answers_html] in PGML; HTML may be escaped
+```
+
+## pgml_style_string_quotes
+
+**File:** `pgml_lint/plugins/pgml_style_string_quotes.py`
+
+**Purpose:** Detects PGML style markup stored in single-quoted Perl strings that contains unescaped single quotes.
+
+**Checks:**
+- PGML style tags like `[<label>]{['span', style => 'color: #...;']}{['','']}` inside single-quoted strings
+- Skips PGML blocks (BEGIN_PGML...END_PGML) where the markup is legal
+
+**Example Issues:**
+```
+file.pg:34: ERROR: PGML style tag inside single-quoted string contains unescaped single quotes; escape as \' or use double quotes or q{...}
+```
+
+**Fixes:**
+- Use double quotes around the Perl string
+- Escape inner quotes with `\\'`
+- Use `q{...}` or `qq{...}` with a safe delimiter
 
 ## pgml_ans_rule
 

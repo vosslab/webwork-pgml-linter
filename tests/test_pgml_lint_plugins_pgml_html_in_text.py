@@ -107,23 +107,20 @@ ENDDOCUMENT();
 
 #============================================
 
-def test_run_detects_table_tags() -> None:
+def test_run_detects_span_tags() -> None:
 	text = """DOCUMENT();
 loadMacros('PGstandard.pl', 'PGML.pl');
 
 BEGIN_PGML
-<table>
-<tr><td>Cell</td></tr>
-</table>
+<span class="note">Span text</span>
 END_PGML
 
 ENDDOCUMENT();
 """
 	context = pgml_lint.engine.build_context(text, None, [], [])
 	issues = pgml_lint.plugins.pgml_html_in_text.run(context)
-	assert len(issues) >= 3
-	assert any("table" in str(issue.get("message", "")).lower() for issue in issues)
-	assert any("DataTable" in str(issue.get("message", "")) for issue in issues)
+	assert len(issues) >= 1
+	assert any("span" in str(issue.get("message", "")).lower() for issue in issues)
 
 
 #============================================
@@ -145,3 +142,21 @@ ENDDOCUMENT();
 	context = pgml_lint.engine.build_context(text, None, [], [])
 	issues = pgml_lint.plugins.pgml_html_in_text.run(context)
 	assert len(issues) == 2
+
+
+#============================================
+
+def test_run_warns_on_tex2jax_ignore_class() -> None:
+	text = """DOCUMENT();
+loadMacros('PGstandard.pl', 'PGML.pl');
+
+BEGIN_PGML
+This is broken: <span class="tex2jax_ignore">no math</span>
+END_PGML
+
+ENDDOCUMENT();
+"""
+	context = pgml_lint.engine.build_context(text, None, [], [])
+	issues = pgml_lint.plugins.pgml_html_in_text.run(context)
+	assert len(issues) == 2
+	assert any("tex2jax_ignore" in str(issue.get("message", "")) for issue in issues)
