@@ -197,7 +197,7 @@ def main():
 	if bugs:
 		print("Action items:")
 		print(f"  1. Fix {len(bugs)} confirmed bugs in {unique_files_with_bugs} files")
-		print(f"  2. Review false positives to improve parser")
+		print("  2. Review false positives to improve parser")
 
 #============================================
 if __name__ == '__main__':

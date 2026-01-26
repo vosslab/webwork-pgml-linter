@@ -29,6 +29,26 @@ def parse_args() -> argparse.Namespace:
 
 
 #============================================
+def extract_allow_utf8_reason(text: str) -> str | None:
+	"""
+	Return the allow-UTF8 justification if present.
+
+	Args:
+		text: File content to scan.
+
+	Returns:
+		str | None: Reason string, or None when no directive exists.
+	"""
+	match = re.search(
+		r"ASCII-COMPLIANCE:\s*ALLOW-UTF8(?:\s*[:\-]\s*|\s+)(\S.+)",
+		text,
+	)
+	if match is None:
+		return None
+	return match.group(1).strip()
+
+
+#============================================
 def read_text(input_file: str) -> tuple[str, str]:
 	"""
 	Read UTF-8 text from a file.
@@ -170,6 +190,8 @@ def fix_ascii_compliance(text: str) -> tuple[str, bool]:
 	Returns:
 		tuple[str, bool]: Updated text and a change flag.
 	"""
+	if extract_allow_utf8_reason(text):
+		return text, False
 	fixed_text, changed = apply_simple_fixes(text)
 	return fixed_text, changed
 

@@ -135,9 +135,9 @@ def summarize_results(results: list, verbose: bool):
 			if result['error']:
 				print(f"  ERROR: {result['error']}")
 			elif not result['exists']:
-				print(f"  ERROR: File not found")
+				print("  ERROR: File not found")
 			elif not result['issues']:
-				print(f"  No issues found")
+				print("  No issues found")
 			else:
 				print(f"  Found {len(result['issues'])} issue(s):")
 				for issue in result['issues']:

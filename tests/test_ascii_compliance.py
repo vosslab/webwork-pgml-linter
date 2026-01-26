@@ -62,6 +62,9 @@ SKIP_DIRS = {".git", ".venv", "old_shell_folder"}
 SKIP_FILES = {
 	os.path.join("CODEX", "skills", ".system", "skill-creator", "SKILL.md"),
 }
+ALLOW_UTF8_RX = re.compile(
+	r"ASCII-COMPLIANCE:\s*ALLOW-UTF8(?:\s*[:\-]\s*|\s+)(\S.+)"
+)
 
 
 #============================================
@@ -305,6 +308,8 @@ def scan_file(
 	content, read_error = check_module.read_text(file_path)
 	if read_error:
 		return 1, [read_error], False
+	if ALLOW_UTF8_RX.search(content):
+		return 0, [], False
 
 	issues = check_module.check_ascii_compliance(content)
 	if not issues:

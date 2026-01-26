@@ -3,6 +3,8 @@
 Test the improved parser on known false positive patterns.
 """
 
+# ASCII-COMPLIANCE: ALLOW-UTF8 - uses Unicode markers in test output
+
 # local repo modules
 from pgml_lint.parser import extract_assigned_vars
 

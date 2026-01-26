@@ -234,11 +234,11 @@ def main():
 	print(f"{'='*70}")
 	print(f"Files processed: {files_processed}")
 	print(f"Files with issues: {files_with_issues}")
-	print(f"")
+	print("")
 	print(f"Confirmed bugs: {len(set(bugs))}")
 	print(f"Legacy code: {len(set(legacy))}")
 	print(f"False positives: {len(set(false_positives))}")
-	print(f"")
+	print("")
 
 	# List only files that were created
 	created_files = []
@@ -254,7 +254,7 @@ def main():
 		for filename in created_files:
 			print(f"  - {os.path.join(OUTPUT_DIR, filename)}")
 	else:
-		print(f"No issues found - no output files created!")
+		print("No issues found - no output files created!")
 
 #============================================
 if __name__ == '__main__':

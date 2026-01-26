@@ -16,6 +16,29 @@
 - Add `tools/renderer_plugin_probe.py` to compare offline plugin results with renderer API lint output via the renderer lint script.
 - Add `tools/renderer_wild_probe.py` to run exploratory renderer lint cases for new plugin ideas.
 - Update `tools/renderer_plugin_probe.py` to resolve REPO_ROOT via `git rev-parse --show-toplevel`.
+- Expand `pgml_header_tags` to check DESCRIPTION/KEYWORDS metadata, smart quotes, and duplicate keywords, plus tests in [tests/test_pgml_lint_plugins_pgml_header_tags.py](../tests/test_pgml_lint_plugins_pgml_header_tags.py).
+- Add `pgml_include_pgproblem` to warn on include-only stubs and unverifiable includes.
+- Add `pgml_line_length` tests in [tests/test_pgml_lint_plugins_pgml_line_length.py](../tests/test_pgml_lint_plugins_pgml_line_length.py).
+- Add `pgml_blob_payloads` to warn on base64-like blobs and ggbbase64 markers.
+- Add `pgml_nbsp` to warn on non-breaking spaces, plus tests in [tests/test_pgml_lint_plugins_pgml_nbsp.py](../tests/test_pgml_lint_plugins_pgml_nbsp.py).
+- Add `pgml_mojibake` to warn on encoding glitches, plus tests in [tests/test_pgml_lint_plugins_pgml_mojibake.py](../tests/test_pgml_lint_plugins_pgml_mojibake.py).
+- Add `pgml_tex_color` to warn on TeX color commands, plus tests in [tests/test_pgml_lint_plugins_pgml_tex_color.py](../tests/test_pgml_lint_plugins_pgml_tex_color.py).
+- Update [docs/PGML_LINT.md](PGML_LINT.md) and [docs/PGML_LINT_PLUGINS.md](PGML_LINT_PLUGINS.md) for the new plugin coverage.
+- Add [docs/PGML_LINT_PLUGIN_IDEAS.md](PGML_LINT_PLUGIN_IDEAS.md) with an extensive list of possible offline lint plugins.
+- Allow an `ASCII-COMPLIANCE: ALLOW-UTF8` directive (with a reason) to skip ASCII checks in [tests/check_ascii_compliance.py](../tests/check_ascii_compliance.py), [tests/fix_ascii_compliance.py](../tests/fix_ascii_compliance.py), and [tests/test_ascii_compliance.py](../tests/test_ascii_compliance.py).
+- Add ASCII compliance allow directive to [training_set_tools/test_parser_improvements.py](../training_set_tools/test_parser_improvements.py) to keep Unicode test markers.
+- Expand [docs/PGML_LINT_PLUGIN_IDEAS.md](PGML_LINT_PLUGIN_IDEAS.md) with more instructor-facing lint ideas (macros, inline HTML, syntax pitfalls).
+- Rework [docs/PGML_LINT_PLUGIN_IDEAS.md](PGML_LINT_PLUGIN_IDEAS.md) to focus on bigger picture plugins, add function signature checks, and drop INFO-only ideas.
+- Add `pgml_loadmacros_integrity`, `pgml_function_signatures`, `pgml_pgml_parse_hazards`, and `pgml_html_policy` plugins with tests and documentation updates.
+- Expand `pgml_html_policy` with additional HTML checks (style tag placement, tex2jax_ignore, media tags), plus tests and docs updates.
+- Add `pgml_modes_in_inline`, `pgml_html_var_passthrough`, and `pgml_pgml_wrapper_in_string` plugins with tests and documentation updates.
+- Extend `macro_rules` defaults to cover `DropDown()` and `NchooseK()` macro requirements.
+- Expand `macro_rules` defaults to include `MultiAnswer()`, `OneOf()`, and `FormulaUpToConstant()`, plus signature coverage updates.
+- Extract function-to-macro pairs into [pgml_lint/function_to_macro_pairs.py](../pgml_lint/function_to_macro_pairs.py) and keep [pgml_lint/rules.py](../pgml_lint/rules.py) as the public wrapper.
+- Fix pyflakes errors in training-set tools by removing empty f-strings.
+- Expand `pgml_html_policy` to flag disallowed tags used inside PGML tag wrappers, plus tests and docs updates.
+- Extend `pgml_mojibake` detection to flag standalone mojibake markers (U+00C2/U+00C3) with test coverage updates.
+- Fix pyflakes warnings by removing empty f-strings in training-set tools and an unused `newlines` variable in `pgml_tex_color`.
 
 ## 2026-01-24 - Legacy PG syntax detection (major update)
 

@@ -10,28 +10,42 @@ This document describes each built-in plugin, what it checks, and example issues
 | `pgml_heredocs` | Yes | PGML heredoc terminators |
 | `document_pairs` | Yes | DOCUMENT/ENDDOCUMENT pairing |
 | `block_rules` | Yes | Custom block rule counts |
+| `pgml_header_tags` | Yes | PG header tag quality |
+| `pgml_include_pgproblem` | Yes | includePGproblem usage |
 | `pgml_required_macros` | Yes | PGML requires PGML.pl |
+| `pgml_loadmacros_integrity` | Yes | loadMacros syntax integrity |
 | `macro_rules` | Yes | Macro requirement coverage |
+| `pgml_function_signatures` | Yes | Function signature checks |
 | `pgml_inline` | Yes | PGML inline markers [@ @] |
+| `pgml_pgml_parse_hazards` | Yes | PGML parse hazard checks |
+| `pgml_modes_in_inline` | Yes | MODES used inside inline eval |
 | `pgml_inline_pgml_syntax` | Yes | PGML syntax inside inline code |
 | `pgml_inline_braces` | Yes | PGML inline brace balance |
 | `pgml_blanks` | Yes | PGML blank specs |
 | `pgml_underscore_emphasis` | Yes | PGML underscore emphasis balance |
 | `pgml_brackets` | No | PGML bracket balance |
 | `pgml_blank_assignments` | Yes | Variable assignment checking |
+| `pgml_line_length` | Yes | Extreme line length warnings |
+| `pgml_blob_payloads` | Yes | Embedded blob payload hints |
 | `pgml_label_dot` | Yes | Label dot list parsing trap |
 | `pgml_ans_style` | Yes | PGML answer style consistency |
 | `pgml_text_blocks` | Yes | Deprecated TEXT blocks |
 | `pgml_html_in_text` | Yes | Raw HTML in PGML text |
+| `pgml_nbsp` | Yes | Non-breaking space detection |
+| `pgml_mojibake` | Yes | Mojibake/encoding glitches |
+| `pgml_tex_color` | Yes | TeX color command warnings |
+| `pgml_html_policy` | Yes | HTML policy checks |
 | `pgml_html_forbidden_tags` | Yes | Forbidden HTML table tags in PGML |
 | `pgml_html_div` | Yes | HTML div tags in PGML |
 | `pgml_span_interpolation` | Yes | Span HTML interpolation checks |
+| `pgml_html_var_passthrough` | Yes | HTML variables without passthrough |
 | `pgml_style_string_quotes` | Yes | Unescaped quotes in PGML style strings |
 | `pgml_ans_rule` | Yes | Legacy ans_rule() function |
 | `pgml_br_variable` | Yes | Legacy $BR variable |
 | `pgml_modes_html_escape` | Yes | MODES HTML escaped in interpolation |
 | `pgml_old_answer_checkers` | Yes | Legacy answer checker functions |
 | `pgml_solution_hint_macros` | Yes | Legacy SOLUTION/HINT macros |
+| `pgml_pgml_wrapper_in_string` | Yes | PGML wrapper syntax in strings |
 
 ## block_markers
 
@@ -125,6 +139,27 @@ file.pg:5: ERROR: ENDDOCUMENT() appears before DOCUMENT()
 file.pg: WARNING: PGML used without required macros: pgml.pl
 ```
 
+## pgml_loadmacros_integrity
+
+**File:** `pgml_lint/plugins/pgml_loadmacros_integrity.py`
+
+**Purpose:** Validate loadMacros() syntax for common compile errors.
+
+**Checks:**
+- Missing closing parenthesis.
+- Missing trailing semicolon.
+- Empty macro list.
+- Missing commas between macro entries.
+- Trailing comma at the end of the list.
+
+**Example Issues:**
+```
+file.pg:5: ERROR: loadMacros() missing closing parenthesis
+file.pg:8: ERROR: loadMacros() missing trailing semicolon
+file.pg:7: ERROR: loadMacros() entries appear to be missing a comma
+file.pg:7: WARNING: loadMacros() macro list ends with a trailing comma
+```
+
 ## macro_rules
 
 **File:** `pgml_lint/plugins/macro_rules.py`
@@ -139,6 +174,11 @@ file.pg: WARNING: PGML used without required macros: pgml.pl
 | `RadioButtons()` | `parserRadioButtons.pl` or `PGchoicemacros.pl` |
 | `CheckboxList()` | `parserCheckboxList.pl` or `PGchoicemacros.pl` |
 | `PopUp()` | `parserPopUp.pl` or `PGchoicemacros.pl` |
+| `DropDown()` | `parserPopUp.pl` or `PGchoicemacros.pl` |
+| `MultiAnswer()` | `parserMultiAnswer.pl` |
+| `OneOf()` | `parserOneOf.pl` |
+| `NchooseK()` | `PGchoicemacros.pl` |
+| `FormulaUpToConstant()` | `parserFormulaUpToConstant.pl` |
 | `DataTable()` | `niceTables.pl` |
 | `LayoutTable()` | `niceTables.pl` |
 | `NumberWithUnits()` | `parserNumberWithUnits.pl` or `contextUnits.pl` |
@@ -152,6 +192,24 @@ file.pg: WARNING: DataTable used without required macros: nicetables.pl
 ```
 
 **Configuration:** Via `--rules` JSON file with `macro_rules` array.
+
+## pgml_function_signatures
+
+**File:** `pgml_lint/plugins/pgml_function_signatures.py`
+
+**Purpose:** Validate common function signatures and empty argument lists.
+
+**Checks:**
+- Expected argument counts for common PG functions (random, NchooseK).
+- Minimum argument counts for common constructors (Compute, Formula, DropDown).
+- Known function name typos (Popup vs PopUp).
+
+**Example Issues:**
+```
+file.pg:12: ERROR: random() called with 2 args; expected at least 3
+file.pg:20: WARNING: DropDown() called with 1 args; expected at least 2
+file.pg:30: ERROR: Function name 'Dropdown' looks wrong; use 'DropDown'
+```
 
 ## pgml_inline
 
@@ -170,6 +228,36 @@ file.pg:50: WARNING: PGML inline close @] without matching [@
 ```
 
 **Side Effects:** Stores `pgml_inline_spans` in context for downstream plugins.
+
+## pgml_pgml_parse_hazards
+
+**File:** `pgml_lint/plugins/pgml_pgml_parse_hazards.py`
+
+**Purpose:** Detect common PGML parse hazards that trigger renderer errors.
+
+**Checks:**
+- Unknown PGML block tokens like `[balance]`.
+- Unbalanced parentheses inside `[@ @]` inline code blocks.
+
+**Example Issues:**
+```
+file.pg:40: WARNING: Unknown PGML block token [balance] may cause parser errors
+file.pg:45: WARNING: PGML inline code has unbalanced parentheses
+```
+
+## pgml_modes_in_inline
+
+**File:** `pgml_lint/plugins/pgml_modes_in_inline.py`
+
+**Purpose:** Detect MODES() calls inside `[@ @]` eval blocks.
+
+**Checks:**
+- Warns when MODES() appears inside inline eval blocks.
+
+**Example Issues:**
+```
+file.pg:20: WARNING: MODES() used inside [@ @] block; MODES returns 1 in eval context and will not emit HTML
+```
 
 ## pgml_inline_pgml_syntax
 
@@ -757,6 +845,173 @@ END_PGML_HINT
 - Consistent with modern PGML style
 - Easier to read and maintain
 
+## pgml_header_tags
+
+**File:** `pgml_lint/plugins/pgml_header_tags.py`
+
+**Purpose:** Checks PG header metadata for missing or placeholder values.
+
+**Checks:**
+- Missing DESCRIPTION/ENDDESCRIPTION or empty DESCRIPTION content
+- Missing KEYWORDS or malformed KEYWORDS(...) syntax
+- KEYWORDS count outside 3-10 entries or duplicate keyword entries
+- Missing DBsubject/DBchapter/DBsection
+- Placeholder DBsubject values (WeBWorK, ZZZ-Inserted Text)
+- Placeholder DBchapter/DBsection text (taxonomy/refer-to hints)
+- Smart quotes in header metadata
+
+**Example Issues:**
+```
+file.pg:1: WARNING: Missing DESCRIPTION block in header
+file.pg:4: WARNING: KEYWORDS tag is malformed; expected KEYWORDS('k1','k2',...)
+file.pg:1: WARNING: DBsubject 'WeBWorK' is a placeholder or noisy value
+```
+
+## pgml_include_pgproblem
+
+**File:** `pgml_lint/plugins/pgml_include_pgproblem.py`
+
+**Purpose:** Warns when a file delegates content to `includePGproblem()`.
+
+**Checks:**
+- Any use of `includePGproblem()` (linter cannot verify target file)
+- Files that appear to contain only includePGproblem and no local content
+
+**Example Issues:**
+```
+file.pg:12: WARNING: includePGproblem() used; target file not verified by linter
+file.pg:12: WARNING: includePGproblem() appears to be the only content in this file
+```
+
+## pgml_line_length
+
+**File:** `pgml_lint/plugins/pgml_line_length.py`
+
+**Purpose:** Warns on extreme line lengths that often hide blobs or break readability.
+
+**Checks:**
+- Lines longer than 200 characters
+- Lines longer than 400 characters (extra warning if no whitespace)
+
+**Example Issues:**
+```
+file.pg:40: WARNING: Line length 412 exceeds 400 characters
+file.pg:40: WARNING: Long line without whitespace suggests embedded blob payload
+```
+
+## pgml_blob_payloads
+
+**File:** `pgml_lint/plugins/pgml_blob_payloads.py`
+
+**Purpose:** Flags embedded base64-like data blobs in PG files.
+
+**Checks:**
+- Base64-like strings over 800 characters
+- ggbbase64 or base64 => markers
+
+**Example Issues:**
+```
+file.pg:90: WARNING: Base64-like blob payload detected; consider removing embedded data
+file.pg:95: WARNING: ggbbase64 payload marker detected; avoid embedded applet blobs
+```
+
+## pgml_nbsp
+
+**File:** `pgml_lint/plugins/pgml_nbsp.py`
+
+**Purpose:** Warns on Unicode non-breaking space characters that can cause layout surprises.
+
+**Checks:**
+- U+00A0 and U+202F non-breaking spaces
+
+**Example Issues:**
+```
+file.pg:15: WARNING: Non-breaking space detected; replace with a normal space to avoid layout surprises
+```
+
+## pgml_mojibake
+
+**File:** `pgml_lint/plugins/pgml_mojibake.py`
+
+**Purpose:** Flags mojibake sequences that indicate encoding mixups.
+
+**Checks:**
+- Common UTF-8/Latin-1 glitch sequences like \\u00c3\\u00a9 or \\u00e2\\u0080
+- Standalone mojibake markers like \\u00c2 and \\u00c3 (often show up as Â or Ã)
+- Unicode replacement character (\\ufffd)
+
+**Example Issues:**
+```
+file.pg:22: WARNING: Possible mojibake sequence '\\u00c3\\u00a9' detected; check for UTF-8/Latin-1 encoding mixups
+```
+
+## pgml_tex_color
+
+**File:** `pgml_lint/plugins/pgml_tex_color.py`
+
+**Purpose:** Warns on TeX color commands that do not render reliably in PGML output.
+
+**Checks:**
+- \\color{...} and \\textcolor{...} in PG content
+
+**Example Issues:**
+```
+file.pg:30: WARNING: TeX color commands (\color, \textcolor) do not render reliably in PGML; use PGML tag wrappers or HTML spans instead
+```
+
+## pgml_html_policy
+
+**File:** `pgml_lint/plugins/pgml_html_policy.py`
+
+**Purpose:** Enforce HTML policy rules outside PGML safe pathways.
+
+**Checks:**
+- Disallowed tags like `<script>`, `<iframe>`, `<object>`, `<embed>`.
+- Table tags outside PGML blocks (common in MODES HTML).
+- Form/input tags that are likely sanitized.
+- Escaped HTML tags (output shows HTML escaping).
+- Inline `<style>` tags outside HEADER_TEXT blocks.
+- `tex2jax_ignore` class usage that suppresses MathJax.
+- SVG/Canvas/Video/Audio tags that are commonly sanitized.
+- Disallowed tags used inside PGML tag wrappers.
+
+**Example Issues:**
+```
+file.pg:10: ERROR: HTML <script> tag detected; avoid raw HTML that can be sanitized
+file.pg:12: ERROR: HTML <table> tag detected; avoid raw HTML that can be sanitized
+file.pg:20: WARNING: HTML <form> tag detected; avoid raw HTML that can be sanitized
+file.pg:25: WARNING: Inline <style> tag found outside HEADER_TEXT; may be sanitized
+file.pg:28: WARNING: HTML class "tex2jax_ignore" found; MathJax is suppressed and output may not render
+```
+
+## pgml_html_var_passthrough
+
+**File:** `pgml_lint/plugins/pgml_html_var_passthrough.py`
+
+**Purpose:** Warn when HTML stored in variables is output without raw passthrough.
+
+**Checks:**
+- Variables assigned HTML tags that are output as `[$var]` without a trailing `*`.
+
+**Example Issues:**
+```
+file.pg:15: WARNING: Variable $label contains HTML but is output without raw passthrough; use [$label]* to avoid escaping
+```
+
+## pgml_pgml_wrapper_in_string
+
+**File:** `pgml_lint/plugins/pgml_pgml_wrapper_in_string.py`
+
+**Purpose:** Warn when PGML tag wrapper syntax appears inside Perl strings.
+
+**Checks:**
+- String literals containing `[<` or `]{[` patterns.
+
+**Example Issues:**
+```
+file.pg:12: WARNING: PGML tag wrapper syntax found inside a Perl string; PGML parses once and will not re-parse strings
+```
+
 ## Plugin Execution Order
 
 Plugins run in registration order (as listed in `BUILTIN_PLUGINS`). Some plugins depend on data from earlier plugins:
@@ -765,6 +1020,8 @@ Plugins run in registration order (as listed in `BUILTIN_PLUGINS`). Some plugins
 2. `pgml_blanks` uses inline spans, stores `pgml_blank_vars` and `pgml_blank_spans`
 3. `pgml_brackets` uses both inline and blank spans
 4. `pgml_blank_assignments` uses `pgml_blank_vars`
+5. `pgml_pgml_parse_hazards` uses `pgml_inline_spans` when present
+6. `pgml_modes_in_inline` uses `pgml_inline_spans` when present
 
 ## Disabling Noisy Plugins
 

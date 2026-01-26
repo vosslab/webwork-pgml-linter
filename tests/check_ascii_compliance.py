@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import os
+import re
 import sys
 
 
@@ -24,6 +25,26 @@ def parse_args() -> argparse.Namespace:
 	)
 	args = parser.parse_args()
 	return args
+
+
+#============================================
+def extract_allow_utf8_reason(text: str) -> str | None:
+	"""
+	Return the allow-UTF8 justification if present.
+
+	Args:
+		text: File content to scan.
+
+	Returns:
+		str | None: Reason string, or None when no directive exists.
+	"""
+	match = re.search(
+		r"ASCII-COMPLIANCE:\s*ALLOW-UTF8(?:\s*[:\-]\s*|\s+)(\S.+)",
+		text,
+	)
+	if match is None:
+		return None
+	return match.group(1).strip()
 
 
 #============================================
@@ -110,6 +131,10 @@ def main() -> int:
 	if read_error:
 		print(read_error, file=sys.stderr)
 		return 1
+
+	allow_reason = extract_allow_utf8_reason(content)
+	if allow_reason:
+		return 0
 
 	issues = check_ascii_compliance(content)
 

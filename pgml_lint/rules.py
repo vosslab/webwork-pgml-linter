@@ -1,6 +1,9 @@
 # Standard Library
 import json
 
+# Local modules
+import pgml_lint.function_to_macro_pairs
+
 
 DEFAULT_BLOCK_RULES: list[dict[str, str]] = [
 	{
@@ -10,54 +13,9 @@ DEFAULT_BLOCK_RULES: list[dict[str, str]] = [
 	},
 ]
 
-DEFAULT_MACRO_RULES: list[dict[str, object]] = [
-	{
-		# PGML.pl loads MathObjects.pl internally, so either satisfies this rule
-		"label": "MathObjects functions",
-		"pattern": r"\b(?:Context|Compute|Formula|Real)\s*\(",
-		"required_macros": ["MathObjects.pl", "PGML.pl"],
-	},
-	{
-		"label": "RadioButtons",
-		"pattern": r"\bRadioButtons\s*\(",
-		"required_macros": ["parserRadioButtons.pl", "PGchoicemacros.pl"],
-	},
-	{
-		"label": "CheckboxList",
-		"pattern": r"\bCheckboxList\s*\(",
-		"required_macros": ["parserCheckboxList.pl", "PGchoicemacros.pl"],
-	},
-	{
-		"label": "PopUp",
-		"pattern": r"\bPopUp\s*\(",
-		"required_macros": ["parserPopUp.pl", "PGchoicemacros.pl"],
-	},
-	{
-		"label": "DataTable",
-		"pattern": r"\bDataTable\s*\(",
-		"required_macros": ["niceTables.pl"],
-	},
-	{
-		"label": "LayoutTable",
-		"pattern": r"\bLayoutTable\s*\(",
-		"required_macros": ["niceTables.pl"],
-	},
-	{
-		"label": "NumberWithUnits",
-		"pattern": r"\bNumberWithUnits\s*\(",
-		"required_macros": ["parserNumberWithUnits.pl", "contextUnits.pl"],
-	},
-	{
-		"label": "Context('Fraction')",
-		"pattern": r"\bContext\s*\(\s*['\"]Fraction['\"]\s*\)",
-		"required_macros": ["contextFraction.pl"],
-	},
-	{
-		"label": "DraggableSubsets",
-		"pattern": r"\bDraggableSubsets\s*\(",
-		"required_macros": ["draggableSubsets.pl"],
-	},
-]
+DEFAULT_MACRO_RULES: list[dict[str, object]] = (
+	pgml_lint.function_to_macro_pairs.DEFAULT_MACRO_RULES
+)
 
 
 #============================================
