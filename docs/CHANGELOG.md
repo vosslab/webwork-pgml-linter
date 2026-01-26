@@ -13,6 +13,9 @@
 - Add `pgml_inline_pgml_syntax` to flag PGML wrapper syntax inside `[@ @]*` blocks, plus tests in [tests/test_pgml_lint_plugins_pgml_inline_pgml_syntax.py](../tests/test_pgml_lint_plugins_pgml_inline_pgml_syntax.py).
 - Add `pgml_label_dot` to warn on `A.` label construction, plus tests in [tests/test_pgml_lint_plugins_pgml_label_dot.py](../tests/test_pgml_lint_plugins_pgml_label_dot.py).
 - Add `pgml_span_interpolation` to warn when `<span>` HTML variables are not interpolated with `[$var]`, plus tests in [tests/test_pgml_lint_plugins_pgml_span_interpolation.py](../tests/test_pgml_lint_plugins_pgml_span_interpolation.py).
+- Add `tools/renderer_plugin_probe.py` to compare offline plugin results with renderer API lint output via the renderer lint script.
+- Add `tools/renderer_wild_probe.py` to run exploratory renderer lint cases for new plugin ideas.
+- Update `tools/renderer_plugin_probe.py` to resolve REPO_ROOT via `git rev-parse --show-toplevel`.
 
 ## 2026-01-24 - Legacy PG syntax detection (major update)
 
