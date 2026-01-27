@@ -1,6 +1,11 @@
 OTHER_REPOS-do_not_commit/
 .DS_Store
 
+all_pgml_files.txt
+output/
+test_results_1000.txt
+test_results_2000.txt
+
 report_shebang.txt
 report_pyflakes.txt
 report_bandit.txt
