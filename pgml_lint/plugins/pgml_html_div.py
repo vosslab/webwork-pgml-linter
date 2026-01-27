@@ -3,6 +3,7 @@ import re
 
 # Local modules
 import pgml_lint.parser
+import pgml_lint.pg_version
 
 PLUGIN_ID = "pgml_html_div"
 PLUGIN_NAME = "HTML div tags in PGML"
@@ -29,6 +30,17 @@ def run(context: dict[str, object]) -> list[dict[str, object]]:
 	text = str(context.get("text", ""))
 	newlines_obj = context.get("newlines", [])
 	newlines = list(newlines_obj) if isinstance(newlines_obj, list) else []
+	pg_version_raw = pgml_lint.pg_version.normalize_pg_version(
+		context.get("pg_version")
+	)
+	pg_version_tuple: tuple[int, int] | None
+	try:
+		pg_version_tuple = pgml_lint.pg_version.parse_pg_version(pg_version_raw)
+	except ValueError:
+		pg_version_tuple = None
+	allow_div = (
+		pg_version_tuple is not None and pg_version_tuple <= (2, 17)
+	)
 
 	pgml_block_regions_obj = context.get("pgml_block_regions", [])
 	pgml_block_regions = (
@@ -47,14 +59,15 @@ def run(context: dict[str, object]) -> list[dict[str, object]]:
 
 		region_text = text[start:end]
 
-		for match in DIV_TAG_RX.finditer(region_text):
-			line = pgml_lint.parser.pos_to_line(newlines, start + match.start())
-			message = (
-				"HTML <div> tag found in PGML content; "
-				"avoid HTML divs because they often render incorrectly"
-			)
-			issue = {"severity": "ERROR", "message": message, "line": line}
-			issues.append(issue)
+		if not allow_div:
+			for match in DIV_TAG_RX.finditer(region_text):
+				line = pgml_lint.parser.pos_to_line(newlines, start + match.start())
+				message = (
+					"HTML <div> tag found in PGML content; "
+					"avoid HTML divs because they often render incorrectly"
+				)
+				issue = {"severity": "ERROR", "message": message, "line": line}
+				issues.append(issue)
 
 		for match in ESCAPED_DIV_RX.finditer(region_text):
 			line = pgml_lint.parser.pos_to_line(newlines, start + match.start())

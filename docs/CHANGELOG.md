@@ -14,6 +14,10 @@
 - Expand seed stability checks to cover known reseed helpers.
 - Avoid signature and PG-version warnings when DropDown/PopUp compatibility wrappers pass through `@_`.
 - Restore inline `MODES(...)` and `<div>` warnings inside PGML blocks.
+- Add PGML parse hazard check for tag wrappers broken across lines.
+- Add `pgml_tag_wrapper_tex` to warn when PGML tag wrappers use non-empty TeX payloads, plus tests and docs.
+- Allow PG 2.17 HTML layout exceptions: suppress MODES-in-inline warnings for HTML-only div/span wrappers and allow raw <div> tags while still flagging escaped divs.
+- Add `pgml_modes_tex_payload` to warn when MODES() uses non-empty TeX payloads, plus tests and docs.
 - Update macro rules documentation and add tests for version gating.
 
 ## 2026-01-26 - PGML style string quote checks

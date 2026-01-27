@@ -15,10 +15,27 @@ END_PGML
 
 ENDDOCUMENT();
 """
-	context = pgml_lint.engine.build_context(text, None, [], [])
+	context = pgml_lint.engine.build_context(text, None, [], [], pg_version="2.18")
 	issues = pgml_lint.plugins.pgml_html_div.run(context)
 	assert len(issues) == 2
 	assert all(issue["severity"] == "ERROR" for issue in issues)
+
+
+#============================================
+
+def test_run_allows_div_in_pgml_text_for_217() -> None:
+	text = """DOCUMENT();
+loadMacros('PGstandard.pl', 'PGML.pl');
+
+BEGIN_PGML
+Here is a <div class="ok">block</div>.
+END_PGML
+
+ENDDOCUMENT();
+"""
+	context = pgml_lint.engine.build_context(text, None, [], [], pg_version="2.17")
+	issues = pgml_lint.plugins.pgml_html_div.run(context)
+	assert issues == []
 
 
 #============================================
@@ -33,10 +50,27 @@ END_PGML
 
 ENDDOCUMENT();
 """
-	context = pgml_lint.engine.build_context(text, None, [], [])
+	context = pgml_lint.engine.build_context(text, None, [], [], pg_version="2.18")
 	issues = pgml_lint.plugins.pgml_html_div.run(context)
 	assert len(issues) == 1
 	assert issues[0]["severity"] == "ERROR"
+
+
+#============================================
+
+def test_run_allows_div_in_inline_code_for_217() -> None:
+	text = """DOCUMENT();
+loadMacros('PGstandard.pl', 'PGML.pl');
+
+BEGIN_PGML
+[@ MODES(TeX => '', HTML => '<div class="two-column">') @]*
+END_PGML
+
+ENDDOCUMENT();
+"""
+	context = pgml_lint.engine.build_context(text, None, [], [], pg_version="2.17")
+	issues = pgml_lint.plugins.pgml_html_div.run(context)
+	assert issues == []
 
 
 #============================================
@@ -51,7 +85,7 @@ END_PGML
 
 ENDDOCUMENT();
 """
-	context = pgml_lint.engine.build_context(text, None, [], [])
+	context = pgml_lint.engine.build_context(text, None, [], [], pg_version="2.17")
 	issues = pgml_lint.plugins.pgml_html_div.run(context)
 	assert len(issues) == 1
 	assert issues[0]["severity"] == "ERROR"

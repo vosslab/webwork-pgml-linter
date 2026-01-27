@@ -11,6 +11,8 @@ DEFAULT_ENABLED = True
 
 UNSUPPORTED_BLOCKS = {"balance"}
 BLOCK_TOKEN_RX = re.compile(r"^\s*\[\s*([A-Za-z]+)\s*\]\s*$")
+TAG_WRAPPER_OPEN = "[<"
+TAG_WRAPPER_CLOSE = ">]"
 
 
 #============================================
@@ -111,5 +113,26 @@ def run(context: dict[str, object]) -> list[dict[str, object]]:
 			message = "PGML inline code has unbalanced parentheses"
 			issue = {"severity": "WARNING", "message": message, "line": line_number}
 			issues.append(issue)
+
+		line_offset = 0
+		for line in block_text.splitlines():
+			search_start = 0
+			while True:
+				open_idx = line.find(TAG_WRAPPER_OPEN, search_start)
+				if open_idx == -1:
+					break
+				abs_open = line_offset + open_idx
+				if any(span_start <= abs_open < span_end for span_start, span_end in inline_spans):
+					search_start = open_idx + 2
+					continue
+				close_idx = line.find(TAG_WRAPPER_CLOSE, open_idx + 2)
+				if close_idx == -1:
+					line_number = pgml_lint.parser.pos_to_line(newlines, start + abs_open)
+					message = "PGML tag wrapper '[<' must be closed before line break"
+					issue = {"severity": "ERROR", "message": message, "line": line_number}
+					issues.append(issue)
+					break
+				search_start = close_idx + 2
+			line_offset += len(line) + 1
 
 	return issues

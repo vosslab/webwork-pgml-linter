@@ -43,3 +43,32 @@ ENDDOCUMENT();
 	context = pgml_lint.engine.build_context(text, None, [], [])
 	issues = pgml_lint.plugins.pgml_pgml_parse_hazards.run(context)
 	assert len(issues) == 0
+
+
+#============================================
+
+def test_tag_wrapper_line_break_warns() -> None:
+	text = """DOCUMENT();
+BEGIN_PGML
+[<span
+]{['span']}
+END_PGML
+ENDDOCUMENT();
+"""
+	context = pgml_lint.engine.build_context(text, None, [], [])
+	issues = pgml_lint.plugins.pgml_pgml_parse_hazards.run(context)
+	assert any("tag wrapper" in str(issue.get("message", "")) for issue in issues)
+
+
+#============================================
+
+def test_tag_wrapper_single_line_ok() -> None:
+	text = """DOCUMENT();
+BEGIN_PGML
+[<span>]{['span']}
+END_PGML
+ENDDOCUMENT();
+"""
+	context = pgml_lint.engine.build_context(text, None, [], [])
+	issues = pgml_lint.plugins.pgml_pgml_parse_hazards.run(context)
+	assert issues == []

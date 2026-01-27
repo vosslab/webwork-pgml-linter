@@ -21,6 +21,7 @@ This document describes each built-in plugin, what it checks, and example issues
 | `pgml_inline` | Yes | PGML inline markers [@ @] |
 | `pgml_pgml_parse_hazards` | Yes | PGML parse hazard checks |
 | `pgml_modes_in_inline` | Yes | MODES used inside inline eval |
+| `pgml_modes_tex_payload` | Yes | MODES TeX payloads should be empty |
 | `pgml_inline_pgml_syntax` | Yes | PGML syntax inside inline code |
 | `pgml_inline_braces` | Yes | PGML inline brace balance |
 | `pgml_blanks` | Yes | PGML blank specs |
@@ -42,6 +43,7 @@ This document describes each built-in plugin, what it checks, and example issues
 | `pgml_span_interpolation` | Yes | Span HTML interpolation checks |
 | `pgml_html_var_passthrough` | Yes | HTML variables without passthrough |
 | `pgml_style_string_quotes` | Yes | Unescaped quotes in PGML style strings |
+| `pgml_tag_wrapper_tex` | Yes | PGML tag wrappers with TeX payloads |
 | `pgml_ans_rule` | Yes | Legacy ans_rule() function |
 | `pgml_br_variable` | Yes | Legacy $BR variable |
 | `pgml_modes_html_escape` | Yes | MODES HTML escaped in interpolation |
@@ -280,11 +282,13 @@ file.pg:50: WARNING: PGML inline close @] without matching [@
 **Checks:**
 - Unknown PGML block tokens like `[balance]`.
 - Unbalanced parentheses inside `[@ @]` inline code blocks.
+- PGML tag wrapper `[< ... >]` not closed before line break.
 
 **Example Issues:**
 ```
 file.pg:40: WARNING: Unknown PGML block token [balance] may cause parser errors
 file.pg:45: WARNING: PGML inline code has unbalanced parentheses
+file.pg:50: ERROR: PGML tag wrapper '[<' must be closed before line break
 ```
 
 ## pgml_modes_in_inline
@@ -295,10 +299,27 @@ file.pg:45: WARNING: PGML inline code has unbalanced parentheses
 
 **Checks:**
 - Warns when MODES() appears inside inline eval blocks.
+- PG 2.17 exception: suppresses warnings when MODES uses `TeX => ''` and
+  `HTML => '<div...>'` (or `<span>`, `<br>`, `<sup>`, `<sub>`) for layout.
+- Warns when layout HTML is used but `TeX` is not empty in PG 2.17 mode.
 
 **Example Issues:**
 ```
 file.pg:20: WARNING: MODES() used inside [@ @] block; MODES returns 1 in eval context and will not emit HTML
+```
+
+## pgml_modes_tex_payload
+
+**File:** `pgml_lint/plugins/pgml_modes_tex_payload.py`
+
+**Purpose:** Warns when MODES() uses non-empty TeX payloads.
+
+**Checks:**
+- Flags any `TeX =>` entry that is not an empty string or empty `q{}`/`qq{}`.
+
+**Example Issues:**
+```
+file.pg:42: WARNING: MODES() TeX payload is non-empty; use TeX => '' for PGML output
 ```
 
 ## pgml_inline_pgml_syntax
@@ -582,10 +603,10 @@ Note: Other plugins like `pgml_html_div` and `pgml_html_forbidden_tags` may stil
 
 **File:** `pgml_lint/plugins/pgml_html_div.py`
 
-**Purpose:** Flags any `<div>` tags that appear in PGML output, including inside inline code.
+**Purpose:** Flags `<div>` tags that appear in PGML output, including inside inline code.
 
 **Checks:**
-- `<div>` or `</div>` tags anywhere in PGML blocks
+- `<div>` or `</div>` tags anywhere in PGML blocks (PG 2.18+ only)
 - Escaped div tags like `&lt;div ...&gt;`
 
 **Example Issues:**
@@ -593,6 +614,10 @@ Note: Other plugins like `pgml_html_div` and `pgml_html_forbidden_tags` may stil
 file.pg:25: ERROR: HTML <div> tag found in PGML content; avoid HTML divs because they often render incorrectly
 file.pg:27: ERROR: Escaped HTML <div> tag found in PGML output; this indicates HTML is being escaped instead of rendered
 ```
+
+**PG 2.17 Compatibility:**
+Raw `<div>` tags are allowed when targeting PG 2.17; prefer HTML-only layout
+via `MODES(TeX => '', HTML => '<div...>')` so TeX output stays empty.
 
 ## pgml_html_forbidden_tags
 
@@ -642,6 +667,25 @@ file.pg:34: ERROR: PGML style tag inside single-quoted string contains unescaped
 - Use double quotes around the Perl string
 - Escape inner quotes with `\\'`
 - Use `q{...}` or `qq{...}` with a safe delimiter
+
+## pgml_tag_wrapper_tex
+
+**File:** `pgml_lint/plugins/pgml_tag_wrapper_tex.py`
+
+**Purpose:** Warns when PGML tag wrappers provide non-empty TeX payloads.
+
+**Checks:**
+- Tag wrappers like `[<div>]{[ 'div' ]}{[ '\\parbox{...}', '}' ]}`
+- Flags non-empty TeX payloads that should usually be empty
+
+**Example Issues:**
+```
+file.pg:42: WARNING: PGML tag wrapper has non-empty TeX payload; use an empty TeX payload unless needed
+```
+
+**Fixes:**
+- Prefer an empty TeX payload: `[<div>]{[ 'div' ]}{ }`
+- Use a TeX payload only when TeX rendering needs special output
 
 ## pgml_ans_rule
 

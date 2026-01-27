@@ -122,12 +122,23 @@ python3 tools/webwork_pgml_simple_lint.py -q -d problems/
 **PGML parse hazards** (`pgml_pgml_parse_hazards` plugin)
 - Flags unknown PGML block tokens like `[balance]`
 - Warns when `[@ @]` inline code has unbalanced parentheses
+- Errors when PGML tag wrappers (`[< ... >]`) are broken across lines
+
+**PGML tag wrapper TeX payloads** (`pgml_tag_wrapper_tex` plugin)
+- Warns when PGML tag wrappers use non-empty TeX payloads
+- Prefer empty TeX payloads (`{ }`) unless TeX rendering needs output
 
 **PGML wrappers in strings** (`pgml_pgml_wrapper_in_string` plugin)
 - Warns when PGML tag wrapper syntax appears inside Perl strings
 
 **MODES in inline eval** (`pgml_modes_in_inline` plugin)
 - Warns when MODES() appears inside `[@ @]` blocks
+- PG 2.17 exception: allow HTML-only layout wrappers like
+  `MODES(TeX => '', HTML => '<div...>')` and require empty TeX
+
+**MODES TeX payloads** (`pgml_modes_tex_payload` plugin)
+- Warns when `MODES()` uses non-empty `TeX =>` payloads
+- Prefer `TeX => ''` for PGML output
 
 **Inline PGML syntax** (`pgml_inline_pgml_syntax` plugin)
 - Flags PGML tag wrapper syntax inside `[@ ... @]*` blocks
