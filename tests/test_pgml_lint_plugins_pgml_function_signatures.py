@@ -57,3 +57,12 @@ def test_oneof_min_args_warning() -> None:
 	context = pgml_lint.engine.build_context(text, None, [], [])
 	issues = pgml_lint.plugins.pgml_function_signatures.run(context)
 	assert any("OneOf()" in str(issue.get("message", "")) for issue in issues)
+
+
+#============================================
+
+def test_passthrough_args_skip_warning() -> None:
+	text = "sub make_popup { return defined &DropDown ? DropDown(@_) : PopUp(@_); }\n"
+	context = pgml_lint.engine.build_context(text, None, [], [])
+	issues = pgml_lint.plugins.pgml_function_signatures.run(context)
+	assert issues == []

@@ -12,6 +12,8 @@
 - Add `docs/RANDOMIZATION_METHODS.md` inventory of PG randomization entry points.
 - Expand seed variation detection to include the randomization inventory.
 - Expand seed stability checks to cover known reseed helpers.
+- Avoid signature and PG-version warnings when DropDown/PopUp compatibility wrappers pass through `@_`.
+- Restore inline `MODES(...)` and `<div>` warnings inside PGML blocks.
 - Update macro rules documentation and add tests for version gating.
 
 ## 2026-01-26 - PGML style string quote checks

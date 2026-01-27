@@ -4,6 +4,11 @@ import re
 # Local modules
 import pgml_lint.pg_version
 
+DROPDOWN_COMPAT_RX = re.compile(
+	r"defined\s*&DropDown\s*\?\s*DropDown\s*\(\s*@_\s*\)\s*:\s*PopUp\s*\(\s*@_\s*\)",
+	re.DOTALL,
+)
+
 
 PLUGIN_ID = "macro_rules"
 PLUGIN_NAME = "Macro rule coverage"
@@ -30,6 +35,7 @@ def run(context: dict[str, object]) -> list[dict[str, object]]:
 	pg_version_raw = pgml_lint.pg_version.normalize_pg_version(
 		context.get("pg_version")
 	)
+	dropdown_compat = bool(DROPDOWN_COMPAT_RX.search(text))
 	pg_version_tuple = None
 	try:
 		pg_version_tuple = pgml_lint.pg_version.parse_pg_version(pg_version_raw)
@@ -66,6 +72,8 @@ def run(context: dict[str, object]) -> list[dict[str, object]]:
 				except ValueError:
 					max_tuple = None
 			if min_tuple is not None and pg_version_tuple < min_tuple:
+				if label == "DropDown" and dropdown_compat:
+					continue
 				label_text = label if label else "Function"
 				message = (
 					f"{label_text} requires PG {min_pg_version}+ "

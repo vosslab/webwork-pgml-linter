@@ -174,6 +174,18 @@ def _parse_args(line: str, open_idx: int) -> tuple[list[str] | None, int]:
 #============================================
 
 
+def _is_passthrough_args(args: list[str]) -> bool:
+	"""
+	Return True when a call passes through @_, indicating a wrapper.
+	"""
+	if len(args) != 1:
+		return False
+	return args[0].strip() == "@_"
+
+
+#============================================
+
+
 def run(context: dict[str, object]) -> list[dict[str, object]]:
 	"""
 	Warn on function signature mismatches and empty argument lists.
@@ -203,6 +215,8 @@ def run(context: dict[str, object]) -> list[dict[str, object]]:
 				continue
 			args, close_idx = _parse_args(clean, match.end() - 1)
 			if args is None or close_idx == -1:
+				continue
+			if _is_passthrough_args(args):
 				continue
 			rule = FUNCTION_RULES[name]
 			arg_count = 0 if args == [] else len(args)

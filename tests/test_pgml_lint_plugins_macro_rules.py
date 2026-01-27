@@ -84,3 +84,28 @@ def test_run_no_warning_when_pg_version_ok() -> None:
 	}
 	issues = pgml_lint.plugins.macro_rules.run(context)
 	assert issues == []
+
+
+#============================================
+
+def test_dropdown_compat_skips_pg_version_warning() -> None:
+	rules = [
+		{
+			"label": "DropDown",
+			"pattern": r"\bDropDown\s*\(",
+			"min_pg_version": "2.18",
+			"required_macros": ["parserPopUp.pl"],
+		},
+	]
+	context = {
+		"stripped_text": (
+			"DOCUMENT();\n"
+			"sub make_popup { return defined &DropDown ? DropDown(@_) : PopUp(@_); }\n"
+			"ENDDOCUMENT();\n"
+		),
+		"macros_loaded": {"parserpopup.pl"},
+		"macro_rules": rules,
+		"pg_version": "2.17",
+	}
+	issues = pgml_lint.plugins.macro_rules.run(context)
+	assert issues == []
