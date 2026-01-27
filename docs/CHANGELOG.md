@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-01-27 - PG 2.17 macro rule support
+
+- Add PG version normalization utilities and pass `pg_version` through lint context.
+- Make `macro_rules` version-aware (min/max PG version checks).
+- Treat `DropDown()` and `CheckboxList()` as PG 2.18+ and accept `parserMultipleChoice.pl` for multiple choice rules.
+- Allow `tools/webwork_pgml_simple_lint.py` to target a PG version via `--pg-version` and log the linter version to stderr.
+- Default the target PG version to 2.17.
+- Allow trailing commas in `loadMacros()` without warning.
+- Add seed stability and seed variation checks for PG problems.
+- Add `docs/RANDOMIZATION_METHODS.md` inventory of PG randomization entry points.
+- Expand seed variation detection to include the randomization inventory.
+- Expand seed stability checks to cover known reseed helpers.
+- Update macro rules documentation and add tests for version gating.
+
 ## 2026-01-26 - PGML style string quote checks
 
 - Add `pgml_style_string_quotes` plugin to flag PGML style tags in single-quoted Perl strings with unescaped quotes that cause compile errors.

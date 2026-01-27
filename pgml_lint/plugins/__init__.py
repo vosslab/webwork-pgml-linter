@@ -10,6 +10,8 @@ BUILTIN_PLUGINS = [
 	"pgml_lint.plugins.pgml_required_macros",
 	"pgml_lint.plugins.pgml_loadmacros_integrity",
 	"pgml_lint.plugins.macro_rules",
+	"pgml_lint.plugins.pgml_seed_stability",
+	"pgml_lint.plugins.pgml_seed_variation",
 	"pgml_lint.plugins.pgml_function_signatures",
 	"pgml_lint.plugins.pgml_inline",
 	"pgml_lint.plugins.pgml_pgml_parse_hazards",

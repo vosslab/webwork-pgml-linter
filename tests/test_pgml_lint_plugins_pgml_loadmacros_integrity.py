@@ -50,7 +50,7 @@ ENDDOCUMENT();
 
 #============================================
 
-def test_trailing_comma_warning() -> None:
+def test_trailing_comma_allowed() -> None:
 	text = """DOCUMENT();
 loadMacros(
   'PGstandard.pl',
@@ -60,8 +60,7 @@ ENDDOCUMENT();
 """
 	context = pgml_lint.engine.build_context(text, None, [], [])
 	issues = pgml_lint.plugins.pgml_loadmacros_integrity.run(context)
-	assert any(issue["severity"] == "WARNING" for issue in issues)
-	assert any("trailing comma" in str(issue.get("message", "")) for issue in issues)
+	assert issues == []
 
 
 #============================================

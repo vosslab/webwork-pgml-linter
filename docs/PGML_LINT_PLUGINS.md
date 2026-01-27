@@ -15,6 +15,8 @@ This document describes each built-in plugin, what it checks, and example issues
 | `pgml_required_macros` | Yes | PGML requires PGML.pl |
 | `pgml_loadmacros_integrity` | Yes | loadMacros syntax integrity |
 | `macro_rules` | Yes | Macro requirement coverage |
+| `pgml_seed_stability` | Yes | Seed stability checks |
+| `pgml_seed_variation` | Yes | Seed variation detection |
 | `pgml_function_signatures` | Yes | Function signature checks |
 | `pgml_inline` | Yes | PGML inline markers [@ @] |
 | `pgml_pgml_parse_hazards` | Yes | PGML parse hazard checks |
@@ -150,14 +152,12 @@ file.pg: WARNING: PGML used without required macros: pgml.pl
 - Missing trailing semicolon.
 - Empty macro list.
 - Missing commas between macro entries.
-- Trailing comma at the end of the list.
 
 **Example Issues:**
 ```
 file.pg:5: ERROR: loadMacros() missing closing parenthesis
 file.pg:8: ERROR: loadMacros() missing trailing semicolon
 file.pg:7: ERROR: loadMacros() entries appear to be missing a comma
-file.pg:7: WARNING: loadMacros() macro list ends with a trailing comma
 ```
 
 ## macro_rules
@@ -171,10 +171,10 @@ file.pg:7: WARNING: loadMacros() macro list ends with a trailing comma
 | Function Pattern | Required Macro(s) |
 |-----------------|-------------------|
 | `Context()`, `Compute()`, `Formula()`, `Real()` | `MathObjects.pl` or `PGML.pl` |
-| `RadioButtons()` | `parserRadioButtons.pl` or `PGchoicemacros.pl` |
-| `CheckboxList()` | `parserCheckboxList.pl` or `PGchoicemacros.pl` |
-| `PopUp()` | `parserPopUp.pl` or `PGchoicemacros.pl` |
-| `DropDown()` | `parserPopUp.pl` or `PGchoicemacros.pl` |
+| `RadioButtons()` | `parserRadioButtons.pl` or `parserMultipleChoice.pl` or `PGchoicemacros.pl` |
+| `CheckboxList()` | `parserCheckboxList.pl` or `parserMultipleChoice.pl` or `PGchoicemacros.pl` |
+| `PopUp()` | `parserPopUp.pl` or `parserMultipleChoice.pl` or `PGchoicemacros.pl` |
+| `DropDown()` | `parserPopUp.pl` or `parserMultipleChoice.pl` or `PGchoicemacros.pl` |
 | `MultiAnswer()` | `parserMultiAnswer.pl` |
 | `OneOf()` | `parserOneOf.pl` |
 | `NchooseK()` | `PGchoicemacros.pl` |
@@ -191,7 +191,49 @@ file.pg: WARNING: MathObjects functions used without required macros: mathobject
 file.pg: WARNING: DataTable used without required macros: nicetables.pl
 ```
 
+**Versioning:** Rules may include `min_pg_version` and `max_pg_version` to flag
+features outside your target PG version. By default the linter targets PG 2.17.
+To lint for PG 2.17 explicitly, pass `--pg-version 2.17` to
+`tools/webwork_pgml_simple_lint.py` or supply the value in a custom integration.
+
 **Configuration:** Via `--rules` JSON file with `macro_rules` array.
+
+## pgml_seed_stability
+
+**File:** `pgml_lint/plugins/pgml_seed_stability.py`
+
+**Purpose:** Warn on non-seeded randomness or clock usage that can break seed stability.
+
+**Checks:**
+- `rand()` or `srand()` usage.
+- Time-based calls (`time()`, `localtime()`, `gmtime()`).
+- Explicit reseed helpers like `SRAND()`, `ProblemRandomize()`, or
+  `PeriodicRerandomization()`.
+  See [docs/RANDOMIZATION_METHODS.md](RANDOMIZATION_METHODS.md) for the inventory used
+  to inform the pattern list.
+
+**Example Issues:**
+```
+file.pg:23: WARNING: rand() may bypass PG seeding; use random() or list_random().
+file.pg:45: WARNING: time() makes values depend on the clock; avoid for stable seeds.
+```
+
+## pgml_seed_variation
+
+**File:** `pgml_lint/plugins/pgml_seed_variation.py`
+
+**Purpose:** Warn when no seed-based randomization is detected.
+
+**Checks:**
+- Looks for common randomization or seed patterns (`random`, `list_random`, `shuffle`,
+  `random_subset`, `PGrandom`, `rand`, `$problemSeed`).
+  See [docs/RANDOMIZATION_METHODS.md](RANDOMIZATION_METHODS.md) for the inventory used
+  to inform the pattern list.
+
+**Example Issues:**
+```
+file.pg: WARNING: No seed-based randomization detected; answer may not vary with seed
+```
 
 ## pgml_function_signatures
 

@@ -185,10 +185,6 @@ def run(context: dict[str, object]) -> list[dict[str, object]]:
 					message = "loadMacros() has an empty macro list"
 					issue = {"severity": "ERROR", "message": message, "line": idx}
 					issues.append(issue)
-				if trimmed.endswith(","):
-					message = "loadMacros() macro list ends with a trailing comma"
-					issue = {"severity": "WARNING", "message": message, "line": idx}
-					issues.append(issue)
 				if MISSING_COMMA_RX.search(block_text):
 					message = "loadMacros() entries appear to be missing a comma"
 					issue = {"severity": "ERROR", "message": message, "line": idx}
@@ -213,10 +209,6 @@ def run(context: dict[str, object]) -> list[dict[str, object]]:
 		if trimmed == "":
 			message = "loadMacros() has an empty macro list"
 			issue = {"severity": "ERROR", "message": message, "line": idx}
-			issues.append(issue)
-		if trimmed.endswith(","):
-			message = "loadMacros() macro list ends with a trailing comma"
-			issue = {"severity": "WARNING", "message": message, "line": idx}
 			issues.append(issue)
 		if MISSING_COMMA_RX.search(block_text):
 			message = "loadMacros() entries appear to be missing a comma"

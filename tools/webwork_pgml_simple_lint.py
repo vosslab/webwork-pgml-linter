@@ -6,6 +6,7 @@ import json
 import os
 import subprocess
 import sys
+import tomllib
 
 # Determine repo root and add to path for local imports
 REPO_ROOT = subprocess.run(
@@ -20,6 +21,7 @@ if REPO_ROOT not in sys.path:
 # Local modules
 import pgml_lint.core
 import pgml_lint.engine
+import pgml_lint.pg_version
 import pgml_lint.registry
 import pgml_lint.rules
 
@@ -74,6 +76,12 @@ def parse_args() -> argparse.Namespace:
 		action="store_true",
 		help=argparse.SUPPRESS,
 	)
+	parser.add_argument(
+		"-p",
+		"--pg-version",
+		dest="pg_version",
+		help="Target PG version for versioned rules (default: 2.17).",
+	)
 	parser.set_defaults(
 		verbose=False,
 		quiet=False,
@@ -122,11 +130,35 @@ def find_files(input_dir: str, extensions: list[str] = DEFAULT_EXTENSIONS) -> li
 #============================================
 
 
+def _load_linter_version(repo_root: str) -> str:
+	"""
+	Load the linter version from pyproject.toml.
+	"""
+	pyproject_path = os.path.join(repo_root, "pyproject.toml")
+	try:
+		with open(pyproject_path, "rb") as handle:
+			data = tomllib.load(handle)
+		version = str(data.get("project", {}).get("version", "")).strip()
+		if version:
+			return version
+	except OSError:
+		pass
+	except tomllib.TOMLDecodeError:
+		pass
+	return "unknown"
+
+
+#============================================
+
+
 def main() -> None:
 	"""
 	Run the lint checker.
 	"""
 	args = parse_args()
+	pg_version = pgml_lint.pg_version.normalize_pg_version(args.pg_version)
+	linter_version = _load_linter_version(REPO_ROOT)
+	print(f"pgml-lint {linter_version}", file=sys.stderr)
 
 	# Use built-in rules and plugins - no configuration needed
 	block_rules, macro_rules = pgml_lint.rules.load_rules(None)
@@ -147,6 +179,7 @@ def main() -> None:
 			block_rules,
 			macro_rules,
 			plugins,
+			pg_version,
 		)
 		issues.extend(file_issues)
 		if not args.json_output:
@@ -163,6 +196,7 @@ def main() -> None:
 				block_rules,
 				macro_rules,
 				plugins,
+				pg_version,
 			)
 			issues.extend(file_issues)
 			if not args.json_output:

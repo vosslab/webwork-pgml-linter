@@ -10,22 +10,40 @@ DEFAULT_MACRO_RULES: list[dict[str, object]] = [
 	{
 		"label": "RadioButtons",
 		"pattern": r"\bRadioButtons\s*\(",
-		"required_macros": ["parserRadioButtons.pl", "PGchoicemacros.pl"],
+		"required_macros": [
+			"parserRadioButtons.pl",
+			"parserMultipleChoice.pl",
+			"PGchoicemacros.pl",
+		],
 	},
 	{
 		"label": "CheckboxList",
 		"pattern": r"\bCheckboxList\s*\(",
-		"required_macros": ["parserCheckboxList.pl", "PGchoicemacros.pl"],
+		"min_pg_version": "2.18",
+		"required_macros": [
+			"parserCheckboxList.pl",
+			"parserMultipleChoice.pl",
+			"PGchoicemacros.pl",
+		],
 	},
 	{
 		"label": "PopUp",
 		"pattern": r"\bPopUp\s*\(",
-		"required_macros": ["parserPopUp.pl", "PGchoicemacros.pl"],
+		"required_macros": [
+			"parserPopUp.pl",
+			"parserMultipleChoice.pl",
+			"PGchoicemacros.pl",
+		],
 	},
 	{
 		"label": "DropDown",
 		"pattern": r"\bDropDown\s*\(",
-		"required_macros": ["parserPopUp.pl", "PGchoicemacros.pl"],
+		"min_pg_version": "2.18",
+		"required_macros": [
+			"parserPopUp.pl",
+			"parserMultipleChoice.pl",
+			"PGchoicemacros.pl",
+		],
 	},
 	{
 		"label": "MultiAnswer",

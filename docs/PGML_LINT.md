@@ -163,13 +163,22 @@ python3 tools/webwork_pgml_simple_lint.py -q -d problems/
 - Detects functions used without required macro files
 - Examples:
   - `Context()` / `Compute()` require `MathObjects.pl` or `PGML.pl`
-  - `RadioButtons()` requires `parserRadioButtons.pl`
-  - `DropDown()` requires `parserPopUp.pl` or `PGchoicemacros.pl`
+  - `RadioButtons()` requires `parserRadioButtons.pl` (or `parserMultipleChoice.pl`)
+  - `DropDown()` requires `parserPopUp.pl` or `parserMultipleChoice.pl` (PG 2.18+)
   - `MultiAnswer()` requires `parserMultiAnswer.pl`
   - `OneOf()` requires `parserOneOf.pl`
   - `NchooseK()` requires `PGchoicemacros.pl`
   - `FormulaUpToConstant()` requires `parserFormulaUpToConstant.pl`
   - `DataTable()` requires `niceTables.pl`
+
+**Seed stability checks** (`pgml_seed_stability` plugin)
+- Warns on `rand()`, `srand()`, or time-based calls that can break seed stability
+- Includes explicit reseed helpers like `SRAND()`, `ProblemRandomize()`, and
+  `PeriodicRerandomization()`; see [docs/RANDOMIZATION_METHODS.md](RANDOMIZATION_METHODS.md)
+
+**Seed variation detection** (`pgml_seed_variation` plugin)
+- Warns when no seed-based randomization is detected
+- See [docs/RANDOMIZATION_METHODS.md](RANDOMIZATION_METHODS.md) for the inventory list
 
 **Function signatures** (`pgml_function_signatures` plugin)
 - Checks expected argument counts for common PG functions

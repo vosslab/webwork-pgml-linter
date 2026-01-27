@@ -2,6 +2,7 @@
 
 # Local modules
 import pgml_lint.parser
+import pgml_lint.pg_version
 
 
 #============================================
@@ -12,6 +13,7 @@ def build_context(
 	file_path: str | None,
 	block_rules: list[dict[str, str]],
 	macro_rules: list[dict[str, object]],
+	pg_version: str | None = None,
 ) -> dict[str, object]:
 	"""
 	Build a shared context dict for plugins.
@@ -25,6 +27,7 @@ def build_context(
 	Returns:
 		dict[str, object]: Context dict.
 	"""
+	pg_version_normalized = pgml_lint.pg_version.normalize_pg_version(pg_version)
 	newlines = pgml_lint.parser.build_newline_index(text)
 	stripped_comments = pgml_lint.parser.strip_comments(text)
 	stripped_text = pgml_lint.parser.strip_heredocs(stripped_comments)
@@ -36,6 +39,7 @@ def build_context(
 	pgml_regions_all = list(pgml_regions) + list(heredoc_regions)
 
 	context = {
+		"pg_version": pg_version_normalized,
 		"file_path": file_path,
 		"text": text,
 		"newlines": newlines,
@@ -159,6 +163,7 @@ def lint_text(
 	block_rules: list[dict[str, str]],
 	macro_rules: list[dict[str, object]],
 	plugins: list[dict[str, object]],
+	pg_version: str | None = None,
 ) -> list[dict[str, object]]:
 	"""
 	Lint a text blob with configured plugins.
@@ -173,7 +178,7 @@ def lint_text(
 	Returns:
 		list[dict[str, object]]: Issue list.
 	"""
-	context = build_context(text, file_path, block_rules, macro_rules)
+	context = build_context(text, file_path, block_rules, macro_rules, pg_version)
 	issues = run_plugins(context, plugins)
 	issues = _attach_issue_excerpts(text, issues)
 	return issues
@@ -187,6 +192,7 @@ def lint_file(
 	block_rules: list[dict[str, str]],
 	macro_rules: list[dict[str, object]],
 	plugins: list[dict[str, object]],
+	pg_version: str | None = None,
 ) -> list[dict[str, object]]:
 	"""
 	Lint a single file.
@@ -202,5 +208,5 @@ def lint_file(
 	"""
 	with open(file_path, "r", encoding="utf-8") as handle:
 		text = handle.read()
-	issues = lint_text(text, file_path, block_rules, macro_rules, plugins)
+	issues = lint_text(text, file_path, block_rules, macro_rules, plugins, pg_version)
 	return issues
