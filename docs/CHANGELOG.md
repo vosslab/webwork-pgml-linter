@@ -5,6 +5,9 @@
 - Add `pgml_modes_html_plain_text` to warn when MODES HTML payloads have no HTML tags (ignores TeX payloads).
 - Add tests for the new plugin in [tests/test_pgml_lint_plugins_pgml_modes_html_plain_text.py](../tests/test_pgml_lint_plugins_pgml_modes_html_plain_text.py).
 - Document the new plugin in [docs/PGML_LINT.md](PGML_LINT.md) and [docs/PGML_LINT_PLUGINS.md](PGML_LINT_PLUGINS.md).
+- Add [docs/LEGACY_DETECTION_PLAN.md](LEGACY_DETECTION_PLAN.md) to outline legacy PG detection planning.
+- Add deprecated `PGchoicemacros.pl` helper list to [docs/LEGACY_DETECTION_PLAN.md](LEGACY_DETECTION_PLAN.md).
+- Expand [docs/LEGACY_DETECTION_PLAN.md](LEGACY_DETECTION_PLAN.md) with deprecated helpers found across macro files.
 
 ## 2026-01-27 - PG 2.17 macro rule support
 
