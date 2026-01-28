@@ -22,6 +22,7 @@ This document describes each built-in plugin, what it checks, and example issues
 | `pgml_pgml_parse_hazards` | Yes | PGML parse hazard checks |
 | `pgml_modes_in_inline` | Yes | MODES used inside inline eval |
 | `pgml_modes_tex_payload` | Yes | MODES TeX payloads should be empty |
+| `pgml_modes_html_plain_text` | Yes | MODES HTML payloads without tags |
 | `pgml_inline_pgml_syntax` | Yes | PGML syntax inside inline code |
 | `pgml_inline_braces` | Yes | PGML inline brace balance |
 | `pgml_blanks` | Yes | PGML blank specs |
@@ -320,6 +321,21 @@ file.pg:20: WARNING: MODES() used inside [@ @] block; MODES returns 1 in eval co
 **Example Issues:**
 ```
 file.pg:42: WARNING: MODES() TeX payload is non-empty; use TeX => '' for PGML output
+```
+
+## pgml_modes_html_plain_text
+
+**File:** `pgml_lint/plugins/pgml_modes_html_plain_text.py`
+
+**Purpose:** Warns when MODES() HTML payloads contain no HTML tags.
+
+**Checks:**
+- Flags `MODES(HTML => '...')` when the HTML value is plain text.
+- Suggests replacing the call with a plain string.
+
+**Example Issues:**
+```
+file.pg:42: WARNING: MODES() HTML payload has no HTML tags; replace with plain string instead of MODES()
 ```
 
 ## pgml_inline_pgml_syntax

@@ -140,6 +140,10 @@ python3 tools/webwork_pgml_simple_lint.py -q -d problems/
 - Warns when `MODES()` uses non-empty `TeX =>` payloads
 - Prefer `TeX => ''` for PGML output
 
+**MODES HTML plain text** (`pgml_modes_html_plain_text` plugin)
+- Warns when `MODES()` HTML payloads contain no HTML tags (regardless of TeX)
+- Suggests replacing the call with a plain string
+
 **Inline PGML syntax** (`pgml_inline_pgml_syntax` plugin)
 - Flags PGML tag wrapper syntax inside `[@ ... @]*` blocks
 - Example error: `PGML tag wrapper syntax found inside [@ @] block`

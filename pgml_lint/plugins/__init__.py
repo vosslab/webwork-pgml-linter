@@ -17,6 +17,7 @@ BUILTIN_PLUGINS = [
 	"pgml_lint.plugins.pgml_pgml_parse_hazards",
 	"pgml_lint.plugins.pgml_modes_in_inline",
 	"pgml_lint.plugins.pgml_modes_tex_payload",
+	"pgml_lint.plugins.pgml_modes_html_plain_text",
 	"pgml_lint.plugins.pgml_inline_pgml_syntax",
 	"pgml_lint.plugins.pgml_inline_braces",
 	"pgml_lint.plugins.pgml_blanks",
